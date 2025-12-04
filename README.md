@@ -15,7 +15,7 @@
  
 ## 주요 기능
 
--**Core**
+**Core**
   - Input System
     - InputManager
     - IInputReader
@@ -25,7 +25,7 @@
     - GameEventBus
     - IGameEvent
 
--**Player**
+**Player**
   - PlayerController
     - 입력 -> 이동 / 상호작용 / 스탯으로 전달하는 허브 역할
       
@@ -46,7 +46,7 @@
     - PlayerItemCollector
     - ItemPickup
 
--**Game System (추가 개발 예정)**
+**Game System (추가 개발 예정)**
   - Inventory System
     - 슬롯 관리, 드래그 & 드롭, 소비 / 장착 시스템
     
