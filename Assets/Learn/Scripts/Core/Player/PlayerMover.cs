@@ -6,7 +6,7 @@ public class PlayerMover : MonoBehaviour
     private Rigidbody rb;
     public float moveSpeed = 5f;
 
-    private Vector2 _moveInput;
+    private Vector2 moveInput;
 
     private void Awake()
     {
@@ -15,7 +15,7 @@ public class PlayerMover : MonoBehaviour
 
     public void SetMoveInput(Vector2 moveInput)
     {
-        _moveInput = moveInput;
+        this.moveInput = moveInput;
     }
 
     private void FixedUpdate()
@@ -24,7 +24,7 @@ public class PlayerMover : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
 
         // 입력을 저장해 둔 _moveInput 사용
-        Vector3 move = new Vector3(_moveInput.x, 0f, _moveInput.y);
+        Vector3 move = new Vector3(moveInput.x, 0f, moveInput.y);
 
         // 대각선 이동 시 속도 증가 방지 Normalize
         if (move.sqrMagnitude > 1f)
