@@ -9,7 +9,7 @@ using System.Collections.Generic;
 public static class GameEventBus
 {
     // key: 이벤트 타입, value: 해당 이벤트 타입에 등록된 핸들러 목록
-    private static readonly Dictionary<Type, Delegate> _eventTable 
+    private static readonly Dictionary<Type, Delegate> eventTable 
         = new Dictionary<Type, Delegate>();
 
 
@@ -23,13 +23,13 @@ public static class GameEventBus
 
         var eventType = typeof(T);
 
-        if (_eventTable.TryGetValue(eventType, out var existingDelegate))
+        if (eventTable.TryGetValue(eventType, out var existingDelegate))
         {
-            _eventTable[eventType] = (Action<T>)existingDelegate + handler;
+            eventTable[eventType] = (Action<T>)existingDelegate + handler;
         }
         else
         {
-            _eventTable[eventType] = handler;
+            eventTable[eventType] = handler;
         }
     }
 
@@ -44,14 +44,14 @@ public static class GameEventBus
 
         var eventType = typeof(T);
 
-        if (_eventTable.TryGetValue(eventType, out var existingDelegate))
+        if (eventTable.TryGetValue(eventType, out var existingDelegate))
         {
             var current = (Action<T>)existingDelegate - handler;
 
             if (current == null)
-                _eventTable.Remove(eventType);
+                eventTable.Remove(eventType);
             else
-                _eventTable[eventType] = current;
+                eventTable[eventType] = current;
         }
     }
 
@@ -64,7 +64,7 @@ public static class GameEventBus
     {
         var eventType = typeof(T);
 
-        if (_eventTable.TryGetValue(eventType, out var existingDelegate))
+        if (eventTable.TryGetValue(eventType, out var existingDelegate))
         {
             // 기존 델리게이트를 캐스팅 후 호출
             ((Action<T>)existingDelegate)?.Invoke(eventData);
@@ -78,6 +78,6 @@ public static class GameEventBus
     /// </summary>
     public static void ClearAll()
     {
-        _eventTable.Clear();
+        eventTable.Clear();
     }
 }

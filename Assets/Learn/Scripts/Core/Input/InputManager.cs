@@ -17,8 +17,6 @@ public class InputManager : MonoBehaviour, IInputReader, PlayerControls.IPlayerA
     public bool DialogueNextPressed { get; private set; }
     public bool AttackPressed { get; private set; }
 
-    // ============ Unity Lifecycle ============
-
     private void Awake()
     {
         controls = new PlayerControls();
@@ -29,21 +27,21 @@ public class InputManager : MonoBehaviour, IInputReader, PlayerControls.IPlayerA
     private void OnDisable() => controls.Disable();
 
 
-    // ============ Input Callback Methods ============
-    // Move
+    // ============ 인풋 콜백 메서드 ============
+    // 무브
     public void OnMove(InputAction.CallbackContext context)
     {
         Move = context.ReadValue<Vector2>();
     }
 
-    // Interact
+    // 상호작용
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed)
             InteractPressed = true;
     }
 
-    // Inventory Toggle
+    // Invenry 토글
     public void OnInventoryToggle(InputAction.CallbackContext context)
     {
         if (context.performed)
