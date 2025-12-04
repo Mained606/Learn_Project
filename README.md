@@ -66,99 +66,45 @@ Assets/
 └─ Learn/
     ├─ Scripts/
     │    ├─ Core/
+    │    │     ├─ Events/
+    │    │     │     └─ GameEventBus.cs
+    │    │     │
     │    │     ├─ Input/
-    │    │     │     ├─ InputManager.cs
-    │    │     │     ├─ IInputReader.cs
     │    │     │     └─ PlayerControls.inputactions
     │    │     │
-    │    │     ├─ Events/
-    │    │     │     ├─ GameEventBus.cs
-    │    │     │     └─ IGameEvent.cs
-    │    │     │
-    │    │     ├─ Utils/
-    │    │     │     ├─ Extensions/
-    │    │     │     └─ Helpers/
+    │    │     ├─ Interfaces/
+    │    │     │     ├─ IGameEvent.cs
+    │    │     │     ├─ IInputReader.cs
+    │    │     │     └─ IInteractable.cs
     │    │     │
     │    │     └─ Managers/
-    │    │           ├─ GameManager.cs
-    │    │           ├─ UIManager.cs
-    │    │           └─ AudioManager.cs
+    │    │           ├─ InputManager.cs
+    │    │           └─ Singleton.cs
     │    │
     │    ├─ Player/
     │    │     ├─ Controller/
     │    │     │     └─ PlayerController.cs
     │    │     │
+    │    │     ├─ Interaction/
+    │    │     │     └─ PlayerInteractor.cs
+    │    │     │
+    │    │     ├─ Items/
+    │    │     │     ├─ ItemPickup.cs
+    │    │     │     └─ PlayerItemCollector.cs
+    │    │     │
     │    │     ├─ Movement/
     │    │     │     └─ PlayerMover.cs
     │    │     │
-    │    │     ├─ Stats/
-    │    │     │     └─ PlayerStats.cs
-    │    │     │
-    │    │     ├─ Interaction/
-    │    │     │     ├─ PlayerInteractor.cs
-    │    │     │     ├─ IInteractable.cs
-    │    │     │     └─ TestInteractable.cs
-    │    │     │
-    │    │     ├─ Items/
-    │    │     │     ├─ PlayerItemCollector.cs
-    │    │     │     ├─ ItemPickup.cs
-    │    │     │     └─ Runtime/
-    │    │     │
-    │    │     └─ Skills/
-    │    │           ├─ Runtime/
-    │    │           ├─ Effects/
-    │    │           └─ Interfaces/
+    │    │     └─ Stats/
+    │    │           └─ PlayerStats.cs
     │    │
-    │    ├─ NPC/
-    │    │     ├─ NPCController.cs
-    │    │     ├─ NPCInteraction.cs
-    │    │     └─ DialogueTrigger.cs
-    │    │
-    │    ├─ Inventory/
-    │    │     ├─ UI/
-    │    │     │     ├─ InventorySlot.cs
-    │    │     │     ├─ SlotDragHandler.cs
-    │    │     │     └─ InventoryPanel.cs
-    │    │     │
-    │    │     ├─ Systems/
-    │    │     │     └─ InventorySystem.cs
-    │    │     │
-    │    │     └─ Data/
-    │    │           └─ ItemData.cs
-    │    │
-    │    ├─ Dialogue/
-    │    │     ├─ DialogueManager.cs
-    │    │     ├─ DialogueUI.cs
-    │    │     └─ DialogueNode.cs
-    │    │
-    │    ├─ Quest/
-    │    │     ├─ QuestSystem.cs
-    │    │     ├─ QuestCondition.cs
-    │    │     └─ QuestData.cs
+    │    ├─ Tests/
+    │    │     └─ TestInteractable.cs
     │    │
     │    └─ UI/
-    │          ├─ HUD/
-    │          ├─ Windows/
-    │          └─ Common/
+    │          └─ Interaction/
+    │                └─ InteractionUI.cs
     │
-    ├─ ScriptableObjects/
-    │    ├─ Items/
-    │    ├─ Skills/
-    │    ├─ Dialogue/
-    │    ├─ Quests/
-    │    └─ NPC/
-    │
-    ├─ Prefabs/
-    │    ├─ Player/
-    │    ├─ Items/
-    │    ├─ NPC/
-    │    ├─ UI/
-    │    └─ World/
-    │
-    ├─ Materials/
-    ├─ Animations/
-    ├─ Audio/
-    ├─ Textures/
-    ├─ Scenes/
-    └─ Tests/
+    └─ (기타 폴더: Prefabs / ScriptableObjects / Scenes ... )
+
 ```
