@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class InputManager : Singleton<InputManager>, IInputReader
 {
@@ -30,6 +29,8 @@ public class InputManager : Singleton<InputManager>, IInputReader
         // 단발 입력들
         controls.Player.Interact.performed += ctx => TryFire(OnInteractEvent);
         controls.Player.InventoryToggle.performed += ctx => TryFire(OnInventoryToggleEvent);
+        
+        // 아직 키 바인딩 전이라 주석 처리함
         // controls.Player.DialogueNext.performed += ctx => TryFire(OnDialogueNextEvent);
         // controls.Player.Attack.performed += ctx => TryFire(OnAttackEvent);
     }
@@ -66,7 +67,7 @@ public class InputManager : Singleton<InputManager>, IInputReader
             case InputContext.UI:
             case InputContext.Dialogue:
             case InputContext.Locked:
-                // 차단 → 아무것도 실행 안 함
+                // 차단 -> 아무것도 실행 안 함
                 break;
         }
     }
