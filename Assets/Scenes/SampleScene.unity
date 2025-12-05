@@ -440,7 +440,7 @@ GameObject:
   - component: {fileID: 619054796}
   - component: {fileID: 619054800}
   - component: {fileID: 619054799}
-  m_Layer: 6
+  m_Layer: 9
   m_Name: Interactable Test Object
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -615,9 +615,9 @@ GameObject:
   - component: {fileID: 874116353}
   - component: {fileID: 874116352}
   - component: {fileID: 874116356}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: TestItem
-  m_TagString: Untagged
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -851,8 +851,16 @@ PrefabInstance:
       propertyPath: m_Constraints
       value: 80
       objectReference: {fileID: 0}
+    - target: {fileID: 5105496564097401612, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}
+      propertyPath: interactLayerMask.m_Bits
+      value: 3584
+      objectReference: {fileID: 0}
     - target: {fileID: 6468606849387616589, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}
       propertyPath: m_Name
+      value: Player
+      objectReference: {fileID: 0}
+    - target: {fileID: 6468606849387616589, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}
+      propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 7737826616095429493, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}

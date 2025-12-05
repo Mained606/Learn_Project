@@ -2,81 +2,104 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public IInputReader inputReader { get; private set; }
-    public PlayerMover playerMover { get; private set; }
-    public PlayerInteractor playerInteractor { get; private set; }
-    public PlayerItemCollector playerItemCollector { get; private set; }
-    public PlayerStats playerStats { get; private set; }
-
-    private PlayerStateMachine stateMachine;
+    public IInputReader InputReader { get; private set; }
+    public PlayerMover PlayerMover { get; private set; }
+    public PlayerInteractor PlayerInteractor { get; private set; }
+    public PlayerItemCollector PlayerItemCollector { get; private set; }
+    public PlayerStats PlayerStats { get; private set; }
+    public PlayerStateMachine StateMachine { get; private set; }
 
     private void Awake()
     {
-        inputReader = InputManager.Instance;
-        playerMover = GetComponent<PlayerMover>();
-        playerInteractor = GetComponent<PlayerInteractor>();
-        playerItemCollector = GetComponent<PlayerItemCollector>();
-        playerStats = GetComponent<PlayerStats>();
+        InputReader = InputManager.Instance;
+        PlayerMover = GetComponent<PlayerMover>();
+        PlayerInteractor = GetComponent<PlayerInteractor>();
+        PlayerItemCollector = GetComponent<PlayerItemCollector>();
+        PlayerStats = GetComponent<PlayerStats>();
+        StateMachine = GetComponent<PlayerStateMachine>();
 
-        stateMachine = GetComponent<PlayerStateMachine>();
+        if (InputReader == null)
+            Debug.LogError("[PlayerController] InputManager Instance를 찾을 수 없습니다.");
+        if (PlayerMover == null)
+            Debug.LogError("[PlayerController] PlayerMover 컴포넌트가 없습니다.");
+        if (PlayerInteractor == null)
+            Debug.LogWarning("[PlayerController] PlayerInteractor 컴포넌트가 없습니다. 레이 기반 상호작용이 비활성화됩니다.");
+        if (PlayerItemCollector == null)
+            Debug.LogWarning("[PlayerController] PlayerItemCollector 컴포넌트가 없습니다. 트리거 기반 아이템 줍기가 비활성화됩니다.");
+        if (StateMachine == null)
+            Debug.LogError("[PlayerController] PlayerStateMachine 컴포넌트가 없습니다.");
     }
 
     private void OnEnable()
     {
-        inputReader.OnInteractEvent += HandleInteract;
-        inputReader.OnInventoryToggleEvent += HandleInventoryToggle;
-        inputReader.OnDialogueNextEvent += HandleDialogueNext;
-        inputReader.OnAttackEvent += HandleAttack;
+        if (InputReader == null) return;
+
+        InputReader.OnInteractEvent += HandleInteract;
+        InputReader.OnInventoryToggleEvent += HandleInventoryToggle;
+        InputReader.OnDialogueNextEvent += HandleDialogueNext;
+        InputReader.OnAttackEvent += HandleAttack;
     }
 
     private void OnDisable()
     {
-        inputReader.OnInteractEvent -= HandleInteract;
-        inputReader.OnInventoryToggleEvent -= HandleInventoryToggle;
-        inputReader.OnDialogueNextEvent -= HandleDialogueNext;
-        inputReader.OnAttackEvent -= HandleAttack;
+        if (InputReader == null) return;
+
+        InputReader.OnInteractEvent -= HandleInteract;
+        InputReader.OnInventoryToggleEvent -= HandleInventoryToggle;
+        InputReader.OnDialogueNextEvent -= HandleDialogueNext;
+        InputReader.OnAttackEvent -= HandleAttack;
     }
 
     private void Start()
     {
-        stateMachine.ChangeState(new PlayerIdleState(stateMachine, this));
+        if (StateMachine != null)
+        {
+            StateMachine.ChangeState(StateMachine.IdleState);
+        }
     }
 
-    // -------------------------
-    // 단발 입력 처리
-    // -------------------------
-
+    /// <summary>
+    /// E 키 입력:
+    /// 1) 먼저 레이 기반 상호작용 시도 (NPC, 장치, 레이 위의 ItemPickup)
+    /// 2) 실패 시 트리거 기반 아이템 줍기 시도 (발 주변 ItemPickup)
+    /// </summary>
     private void HandleInteract()
     {
-        // 1) 먼저 레이 기반 상호작용을 시도한다.
-        if (playerInteractor != null && playerInteractor.TryInteract())
-            return; // 상호작용 성공 → 여기서 종료
+        bool interacted = false;
 
-        // 2) 레이 상호작용 실패 → 바닥 아이템 줍기 시도
-        if (playerItemCollector != null)
-            playerItemCollector.TryPickup();
+        if (PlayerInteractor != null)
+        {
+            interacted = PlayerInteractor.TryInteract();
+        }
+
+        // 레이 기반 상호작용에 실패한 경우에만 바닥 아이템 줍기 시도
+        if (!interacted && PlayerItemCollector != null)
+        {
+            PlayerItemCollector.TryPickup();
+        }
     }
-
 
     private void HandleInventoryToggle()
     {
+        // 인풋 컨텍스트 전환만 먼저 처리
         InputManager.Instance.SetContext(InputContext.Inventory);
 
-        // 인벤토리 상태로 전환
-        // stateMachine.ChangeState(new PlayerInventoryState(stateMachine, this));
+        // 나중에 인벤토리 상태로 전환 예정
+        // StateMachine.ChangeState(StateMachine.InventoryState);
     }
 
     private void HandleDialogueNext()
     {
-        // Dialogue 상태가 아닐 수도 있으므로 컨텍스트 확인
         if (InputManager.Instance.CurrentContext == InputContext.Dialogue)
         {
-            // 대사 넘기기 처리
+            // 나중에 DialogueState 에 메시지 전달 예정
+            Debug.Log("[PlayerController] 다이얼로그 다음 대사 요청");
         }
     }
 
     private void HandleAttack()
     {
-        // 나중에 CombatState 추가 예정
+        // 나중에 CombatState 추가 후 처리
+        Debug.Log("[PlayerController] 공격 입력 감지");
     }
 }

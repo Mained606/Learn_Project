@@ -1,8 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// 플레이어가 이동 중인 상태
-/// </summary>
 public class PlayerMoveState : PlayerState
 {
     public PlayerMoveState(PlayerStateMachine machine, PlayerController controller)
@@ -16,7 +13,7 @@ public class PlayerMoveState : PlayerState
     public override void Tick()
     {
         // 이동 입력이 사라지면 Idle로 전환
-        if (controller.inputReader.Move.sqrMagnitude < 0.1f)
+        if (controller.InputReader.Move.sqrMagnitude < 0.1f)
         {
             stateMachine.ChangeState(stateMachine.IdleState);
         }
@@ -25,13 +22,13 @@ public class PlayerMoveState : PlayerState
     public override void PhysicsTick()
     {
         // 이동 입력을 받아 물리 이동 처리
-        Vector2 moveInput = controller.inputReader.Move;
-        controller.playerMover.SetMoveInput(moveInput);
+        Vector2 moveInput = controller.InputReader.Move;
+        controller.PlayerMover.SetMoveInput(moveInput);
     }
 
     public override void Exit()
     {
         // Move에서 나갈 때는 이동을 즉시 멈추도록 강제 처리
-        controller.playerMover.SetMoveInput(Vector2.zero);
+        controller.PlayerMover.SetMoveInput(Vector2.zero);
     }
 }
