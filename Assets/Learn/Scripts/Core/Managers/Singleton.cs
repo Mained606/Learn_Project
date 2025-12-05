@@ -1,21 +1,35 @@
 using UnityEngine;
 
-/// <summary>
-/// 제네릭 타입 싱글톤
-/// </summary>
 public abstract class Singleton<T> : MonoBehaviour where T : MonoBehaviour
 {
-    public static T Instance { get; private set; }
+    private static T instance;
+    public static T Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                // 씬에 존재하는지 먼저 확인
+                instance = FindFirstObjectByType<T>();
+
+                if (instance == null)
+                {
+                    Debug.LogError($"[Singleton] {typeof(T)} Instance를 씬에서 찾지 못 했습니다.");
+                }
+            }
+            return instance;
+        }
+    }
 
     protected virtual void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (instance != null && instance != this)
         {
             Destroy(gameObject);
             return;
         }
 
-        Instance = this as T;
-        DontDestroyOnLoad(gameObject);
+        instance = this as T;
+        DontDestroyOnLoad(gameObject); // 전역 유지
     }
 }

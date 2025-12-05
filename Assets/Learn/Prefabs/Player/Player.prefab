@@ -128,6 +128,7 @@ GameObject:
   - component: {fileID: 6102109189471931836}
   - component: {fileID: 5105496564097401612}
   - component: {fileID: 5608428114599988348}
+  - component: {fileID: 3703531057901100854}
   - component: {fileID: 2115827666151891703}
   m_Layer: 0
   m_Name: Player
@@ -311,6 +312,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f5b26db15cef4ab0a453809b7b02a53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemCollector
+--- !u!114 &3703531057901100854
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6468606849387616589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ba7f2a0599344ef0af1b86e219b1dc7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
 --- !u!114 &2115827666151891703
 MonoBehaviour:
   m_ObjectHideFlags: 0

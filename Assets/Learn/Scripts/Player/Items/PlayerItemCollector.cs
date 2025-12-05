@@ -6,21 +6,27 @@ public class PlayerItemCollector : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.TryGetComponent(out ItemPickup item))
+        if (other.TryGetComponent<ItemPickup>(out var item))
+        {
             currentItem = item;
+        }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (currentItem != null && other.TryGetComponent(out ItemPickup item))
-            currentItem = null;
+        if (other.TryGetComponent<ItemPickup>(out var item))
+        {
+            if (currentItem == item)
+                currentItem = null;
+        }
     }
 
     public void TryPickup()
     {
-        if (currentItem == null) return;
-
-        currentItem.Pickup();
-        currentItem = null;
+        if (currentItem != null)
+        {
+            currentItem.Pickup();
+            currentItem = null;
+        }
     }
 }

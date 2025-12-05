@@ -29,8 +29,12 @@ public class PlayerInteractor : MonoBehaviour
         }
     }
 
-    public void TryInteract()
+    public bool TryInteract()
     {
-        currentTarget?.Interact();
+        if (currentTarget == null)
+            return false;
+
+        currentTarget.Interact(gameObject);
+        return true;
     }
 }

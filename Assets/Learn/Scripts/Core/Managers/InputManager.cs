@@ -1,75 +1,73 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
-/// New Input System 기반 입력 처리 모듈.
-/// IInputReader를 구현하여 다른 시스템이 이 클래스를 직접 참조하지 않아도 되도록 함.
-/// 모듈형 프레임워크에서도 재사용 가능.
-/// </summary>
-public class InputManager : MonoBehaviour, IInputReader, PlayerControls.IPlayerActions
+public class InputManager : Singleton<InputManager>, IInputReader
 {
+    public Vector2 Move { get; private set; }
+
+    public event Action OnInteractEvent;
+    public event Action OnInventoryToggleEvent;
+    public event Action OnDialogueNextEvent;
+    public event Action OnAttackEvent;
+
     private PlayerControls controls;
 
-    // ============ 입력 상태 ============
-    public Vector2 Move { get; private set; }
-    public bool InteractPressed { get; private set; }
-    public bool InventoryToggled { get; private set; }
-    public bool DialogueNextPressed { get; private set; }
-    public bool AttackPressed { get; private set; }
+    // 현재 입력 컨텍스트
+    public InputContext CurrentContext { get; private set; } = InputContext.Gameplay;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
+        
         controls = new PlayerControls();
-        controls.Player.SetCallbacks(this);
+
+        // Move = 상태 값
+        controls.Player.Move.performed += ctx => Move = ctx.ReadValue<Vector2>();
+        controls.Player.Move.canceled += ctx => Move = Vector2.zero;
+
+
+        // 단발 입력들
+        controls.Player.Interact.performed += ctx => TryFire(OnInteractEvent);
+        controls.Player.InventoryToggle.performed += ctx => TryFire(OnInventoryToggleEvent);
+        // controls.Player.DialogueNext.performed += ctx => TryFire(OnDialogueNextEvent);
+        // controls.Player.Attack.performed += ctx => TryFire(OnAttackEvent);
     }
 
-    private void OnEnable() => controls.Enable();
-    private void OnDisable() => controls.Disable();
-
-
-    // ============ 인풋 콜백 메서드 ============
-    // 무브
-    public void OnMove(InputAction.CallbackContext context)
+    private void OnEnable()
     {
-        Move = context.ReadValue<Vector2>();
+        controls.Enable();
     }
 
-    // 상호작용
-    public void OnInteract(InputAction.CallbackContext context)
+    private void OnDisable()
     {
-        if (context.performed)
-            InteractPressed = true;
+        controls.Disable();
     }
 
-    // Invenry 토글
-    public void OnInventoryToggle(InputAction.CallbackContext context)
+    // 입력 컨텍스트 변경
+    public void SetContext(InputContext context)
     {
-        if (context.performed)
-            InventoryToggled = true;
+        CurrentContext = context;
     }
 
-    // Dialogue Next
-    public void OnDialogueNext(InputAction.CallbackContext context)
+    // 컨텍스트에 따라 단발 입력 차단
+    private void TryFire(System.Action action)
     {
-        if (context.performed)
-            DialogueNextPressed = true;
-    }
+        if (action == null) return;
 
-    // Attack
-    public void OnAttack(InputAction.CallbackContext context)
-    {
-        if (context.performed)
-            AttackPressed = true;
-    }
+        // 입력 허용 조건
+        switch (CurrentContext)
+        {
+            case InputContext.Gameplay:
+                action?.Invoke();
+                break;
 
-    // ============ 매 프레임 입력 상태 초기화 ============
-
-    private void LateUpdate()
-    {
-        // 버튼 입력은 1프레임짜리 신호이므로 매 프레임 초기화
-        InteractPressed = false;
-        InventoryToggled = false;
-        DialogueNextPressed = false;
-        AttackPressed = false;
+            case InputContext.Inventory:
+            case InputContext.UI:
+            case InputContext.Dialogue:
+            case InputContext.Locked:
+                // 차단 → 아무것도 실행 안 함
+                break;
+        }
     }
 }
