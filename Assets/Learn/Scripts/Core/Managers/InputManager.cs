@@ -1,75 +1,128 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-/// <summary>
-/// New Input System 기반 입력 처리 모듈.
-/// IInputReader를 구현하여 다른 시스템이 이 클래스를 직접 참조하지 않아도 되도록 함.
-/// 모듈형 프레임워크에서도 재사용 가능.
-/// </summary>
-public class InputManager : MonoBehaviour, IInputReader, PlayerControls.IPlayerActions
+// Assets/Learn/Scripts/Core/Managers/InputManager.cs
+public class InputManager : Singleton<InputManager>, IInputReader, PlayerControls.IPlayerActions
 {
+    // New Input System에서 자동 생성된 클래스
     private PlayerControls controls;
 
-    // ============ 입력 상태 ============
+    // 이동 상태 값 (IInputReader 구현)
     public Vector2 Move { get; private set; }
-    public bool InteractPressed { get; private set; }
-    public bool InventoryToggled { get; private set; }
-    public bool DialogueNextPressed { get; private set; }
-    public bool AttackPressed { get; private set; }
 
-    private void Awake()
+    // 단발 입력 이벤트들 (IInputReader 구현)
+    public event Action OnInteractEvent;
+    public event Action OnInventoryToggleEvent;
+    public event Action OnDialogueNextEvent;
+    public event Action OnAttackEvent;
+
+    protected override void Awake()
     {
+        base.Awake();
+        InitializeInput();
+    }
+
+    private void InitializeInput()
+    {
+        // 입력 액션 인스턴스 생성
         controls = new PlayerControls();
+
+        // 콜백 등록 (자동 생성된 IPlayerActions 인터페이스 사용)
         controls.Player.SetCallbacks(this);
     }
 
-    private void OnEnable() => controls.Enable();
-    private void OnDisable() => controls.Disable();
-
-
-    // ============ 인풋 콜백 메서드 ============
-    // 무브
-    public void OnMove(InputAction.CallbackContext context)
+    private void OnEnable()
     {
-        Move = context.ReadValue<Vector2>();
+        if (controls == null)
+        {
+            InitializeInput();
+        }
+
+        controls.Player.Enable();
     }
 
-    // 상호작용
-    public void OnInteract(InputAction.CallbackContext context)
+    private void OnDisable()
+    {
+        if (controls != null)
+        {
+            controls.Player.Disable();
+        }
+    }
+
+    #region New Input System 콜백 구현부 (절대 이름 변경 금지)
+
+    // Move (벡터 상태)
+    void PlayerControls.IPlayerActions.OnMove(InputAction.CallbackContext context)
+    {
+        HandleMove(context);
+    }
+
+    // Interact (단발)
+    void PlayerControls.IPlayerActions.OnInteract(InputAction.CallbackContext context)
+    {
+        HandleInteract(context);
+    }
+
+    // // InventoryToggle (단발)
+    // void PlayerControls.IPlayerActions.OnInventoryToggle(InputAction.CallbackContext context)
+    // {
+    //     HandleInventoryToggle(context);
+    // }
+    //
+    // // DialogueNext (단발)
+    // void PlayerControls.IPlayerActions.OnDialogueNext(InputAction.CallbackContext context)
+    // {
+    //     HandleDialogueNext(context);
+    // }
+    //
+    // // Attack (단발)
+    // void PlayerControls.IPlayerActions.OnAttack(InputAction.CallbackContext context)
+    // {
+    //     HandleAttack(context);
+    // }
+
+    #endregion
+
+    #region 내부 핸들러 → 이벤트 3단계 구조
+
+    // 1) Move는 performed/canceled 둘 다 상태 업데이트
+    private void HandleMove(InputAction.CallbackContext context)
     {
         if (context.performed)
-            InteractPressed = true;
+        {
+            Move = context.ReadValue<Vector2>();
+        }
+        else if (context.canceled)
+        {
+            Move = Vector2.zero;
+        }
     }
 
-    // Invenry 토글
-    public void OnInventoryToggle(InputAction.CallbackContext context)
+    private void HandleInteract(InputAction.CallbackContext context)
     {
-        if (context.performed)
-            InventoryToggled = true;
+        // 단발 입력은 performed 시점에서만 이벤트 발행
+        if (!context.performed) return;
+        OnInteractEvent?.Invoke();
     }
 
-    // Dialogue Next
-    public void OnDialogueNext(InputAction.CallbackContext context)
+    private void HandleInventoryToggle(InputAction.CallbackContext context)
     {
-        if (context.performed)
-            DialogueNextPressed = true;
+        if (!context.performed) return;
+        OnInventoryToggleEvent?.Invoke();
     }
 
-    // Attack
-    public void OnAttack(InputAction.CallbackContext context)
+    private void HandleDialogueNext(InputAction.CallbackContext context)
     {
-        if (context.performed)
-            AttackPressed = true;
+        if (!context.performed) return;
+        OnDialogueNextEvent?.Invoke();
     }
 
-    // ============ 매 프레임 입력 상태 초기화 ============
-
-    private void LateUpdate()
+    private void HandleAttack(InputAction.CallbackContext context)
     {
-        // 버튼 입력은 1프레임짜리 신호이므로 매 프레임 초기화
-        InteractPressed = false;
-        InventoryToggled = false;
-        DialogueNextPressed = false;
-        AttackPressed = false;
+        if (!context.performed) return;
+        OnAttackEvent?.Invoke();
     }
+
+    #endregion
 }

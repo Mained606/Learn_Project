@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 /// <summary>
@@ -6,9 +7,12 @@ using UnityEngine;
 /// </summary>
 public interface IInputReader
 {
+    // 항상 유지되는 상태 값
     Vector2 Move { get; }
-    bool InteractPressed { get; }
-    bool InventoryToggled { get; }
-    bool DialogueNextPressed { get; }
-    bool AttackPressed { get; }
+
+    // 단발 입력 (이벤트 기반)
+    event Action OnInteractEvent;
+    event Action OnInventoryToggleEvent;
+    event Action OnDialogueNextEvent;
+    event Action OnAttackEvent;
 }

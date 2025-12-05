@@ -31,6 +31,8 @@ public class PlayerInteractor : MonoBehaviour
 
     public void TryInteract()
     {
-        currentTarget?.Interact();
+        if (currentTarget == null) return;
+
+        currentTarget.Interact(gameObject); // 상호작용 주체 전달
     }
 }

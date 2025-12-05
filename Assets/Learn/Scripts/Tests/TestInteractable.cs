@@ -4,8 +4,8 @@ public class TestInteractable : MonoBehaviour, IInteractable
 {
     public string InteractionPrompt => "Press E to Interact";
 
-    public void Interact()
+    public void Interact(GameObject interactor)
     {
-        Debug.Log("상호작용 성공!");
+        Debug.Log($"{interactor.name} 이(가) 상호작용 성공!");
     }
 }
