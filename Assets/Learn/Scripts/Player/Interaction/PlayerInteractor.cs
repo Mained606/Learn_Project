@@ -7,7 +7,10 @@ public class PlayerInteractor : MonoBehaviour
     [SerializeField] private LayerMask interactLayerMask;      // 상호작용 대상 레이어 (NPC, 오브젝트, ItemPickup 등)
 
     [Header("디버그")]
-    [SerializeField] private IInteractable currentTarget;
+    [SerializeField] private string currentTargetName;
+    
+    // 현재 포커싱 중인 대상
+    private IInteractable currentTarget;
 
     public IInteractable CurrentTarget => currentTarget;
 
@@ -43,7 +46,12 @@ public class PlayerInteractor : MonoBehaviour
             if (hit.collider.TryGetComponent(out IInteractable interactable))
             {
                 currentTarget = interactable;
+                currentTargetName = hit.collider.gameObject.name;
             }
+        }
+        else
+        {
+            currentTargetName = string.Empty;
         }
     }
     
