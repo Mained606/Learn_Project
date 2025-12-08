@@ -23,6 +23,11 @@ public class PlayerInventory : MonoBehaviour
 
     public event Action<IReadOnlyList<ItemData>> OnInventoryChanged;
 
+    private void Awake()
+    {
+        EnsureCapacity();
+    }
+
     // 현재 슬롯 용량만큼 내부 리스트를 패딩하여 빈 슬롯을 표현
     private void EnsureCapacity()
     {

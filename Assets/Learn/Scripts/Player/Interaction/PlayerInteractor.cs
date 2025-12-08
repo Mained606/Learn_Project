@@ -5,6 +5,7 @@ public class PlayerInteractor : MonoBehaviour
     [Header("레이 설정")]
     [SerializeField] private float interactDistance = 3f;      // 상호작용 가능 거리
     [SerializeField] private LayerMask interactLayerMask;      // 상호작용 대상 레이어 (NPC, 오브젝트, ItemPickup 등)
+    [SerializeField] private bool useCameraForward = false;    // 카메라 기준 Ray 사용 여부
 
     [Header("디버그")]
     [SerializeField] private string currentTargetName;
@@ -36,8 +37,19 @@ public class PlayerInteractor : MonoBehaviour
         currentTarget = null;
 
         // 플레이어 기준으로 레이 쏘기
-        Vector3 origin = transform.position + Vector3.up * 0.2f;   // 플레이어 머리 근처
-        Vector3 direction = transform.forward;                      // 플레이어가 바라보는 방향
+        Vector3 origin;
+        Vector3 direction;
+
+        if (useCameraForward && mainCamera != null)
+        {
+            origin = mainCamera.transform.position;
+            direction = mainCamera.transform.forward;
+        }
+        else
+        {
+            origin = transform.position + Vector3.up * 0.2f;   // 플레이어 머리 근처
+            direction = transform.forward;                      // 플레이어가 바라보는 방향
+        }
 
         Debug.DrawRay(origin, direction * interactDistance, Color.red);
 

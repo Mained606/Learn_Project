@@ -90,17 +90,4 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 드래그 앤 드롭 후 슬롯 순서를 교환.
-    /// </summary>
-    public void RequestSwap(int fromIndex, int toIndex)
-    {
-        if (playerInventory == null) return;
-
-        bool swapped = playerInventory.SwapItems(fromIndex, toIndex);
-        if (!swapped)
-        {
-            Debug.LogWarning("[InventoryUI] 슬롯 교환에 실패했습니다.");
-        }
-    }
 }

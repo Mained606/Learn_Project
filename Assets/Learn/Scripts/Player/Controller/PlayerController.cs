@@ -35,7 +35,6 @@ public class PlayerController : MonoBehaviour
         if (InputReader == null) return;
 
         InputReader.OnInteractEvent += HandleInteract;
-        InputReader.OnInventoryToggleEvent += HandleInventoryToggle;
         InputReader.OnDialogueNextEvent += HandleDialogueNext;
         InputReader.OnAttackEvent += HandleAttack;
     }
@@ -45,17 +44,13 @@ public class PlayerController : MonoBehaviour
         if (InputReader == null) return;
 
         InputReader.OnInteractEvent -= HandleInteract;
-        InputReader.OnInventoryToggleEvent -= HandleInventoryToggle;
         InputReader.OnDialogueNextEvent -= HandleDialogueNext;
         InputReader.OnAttackEvent -= HandleAttack;
     }
 
     private void Start()
     {
-        if (StateMachine != null)
-        {
-            StateMachine.ChangeState(StateMachine.IdleState);
-        }
+        // 초기 상태 전환은 PlayerStateMachine.Start에서 처리
     }
 
     private void HandleInteract()
@@ -66,15 +61,6 @@ public class PlayerController : MonoBehaviour
 
         // 2) 수집 대상이 없으면 레이 기반 상호작용 수행
         PlayerInteractor?.TryInteract();
-    }
-
-    private void HandleInventoryToggle()
-    {
-        // 인풋 컨텍스트 전환만 먼저 처리
-        InputManager.Instance.SetContext(InputContext.Inventory);
-
-        // 나중에 인벤토리 상태로 전환 예정
-        // StateMachine.ChangeState(StateMachine.InventoryState);
     }
 
     private void HandleDialogueNext()
