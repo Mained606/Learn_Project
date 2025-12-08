@@ -35,7 +35,6 @@ public class PlayerController : MonoBehaviour
         if (InputReader == null) return;
 
         InputReader.OnInteractEvent += HandleInteract;
-        InputReader.OnInventoryToggleEvent += HandleInventoryToggle;
         InputReader.OnDialogueNextEvent += HandleDialogueNext;
         InputReader.OnAttackEvent += HandleAttack;
     }
@@ -45,47 +44,23 @@ public class PlayerController : MonoBehaviour
         if (InputReader == null) return;
 
         InputReader.OnInteractEvent -= HandleInteract;
-        InputReader.OnInventoryToggleEvent -= HandleInventoryToggle;
         InputReader.OnDialogueNextEvent -= HandleDialogueNext;
         InputReader.OnAttackEvent -= HandleAttack;
     }
 
     private void Start()
     {
-        if (StateMachine != null)
-        {
-            StateMachine.ChangeState(StateMachine.IdleState);
-        }
+        // 초기 상태 전환은 PlayerStateMachine.Start에서 처리
     }
 
-    /// <summary>
-    /// E 키 입력:
-    /// 1) 먼저 레이 기반 상호작용 시도 (NPC, 장치, 레이 위의 ItemPickup)
-    /// 2) 실패 시 트리거 기반 아이템 줍기 시도 (발 주변 ItemPickup)
-    /// </summary>
     private void HandleInteract()
     {
-        bool interacted = false;
+        // 1) 트리거 범위 내 바닥 아이템을 먼저 수동 수집
+        if (PlayerItemCollector != null && PlayerItemCollector.TryPickup())
+            return;
 
-        if (PlayerInteractor != null)
-        {
-            interacted = PlayerInteractor.TryInteract();
-        }
-
-        // 레이 기반 상호작용에 실패한 경우에만 바닥 아이템 줍기 시도
-        if (!interacted && PlayerItemCollector != null)
-        {
-            PlayerItemCollector.TryPickup();
-        }
-    }
-
-    private void HandleInventoryToggle()
-    {
-        // 인풋 컨텍스트 전환만 먼저 처리
-        InputManager.Instance.SetContext(InputContext.Inventory);
-
-        // 나중에 인벤토리 상태로 전환 예정
-        // StateMachine.ChangeState(StateMachine.InventoryState);
+        // 2) 수집 대상이 없으면 레이 기반 상호작용 수행
+        PlayerInteractor?.TryInteract();
     }
 
     private void HandleDialogueNext()

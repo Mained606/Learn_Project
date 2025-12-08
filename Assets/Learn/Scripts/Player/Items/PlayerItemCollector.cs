@@ -2,35 +2,46 @@ using UnityEngine;
 
 public class PlayerItemCollector : MonoBehaviour
 {
-    // 현재 트리거 범위 안에 있는 상호작용 가능 오브젝트(주로 ItemPickup)
-    private IInteractable currentItem;
+    [Header("수집 로그 출력 여부")]
+    [SerializeField] private bool logPickup = true;
+
+    // 트리거 범위 내 현재 포커스된 바닥 아이템
+    private ItemPickup currentPickup;
 
     private void OnTriggerEnter(Collider other)
     {
-        // 트리거 영역에 들어온 오브젝트 중 IInteractable 을 가진 오브젝트만 대상
-        if (other.TryGetComponent(out IInteractable interactable))
+        // 트리거로 감지된 바닥 아이템만 포커스
+        if (other.TryGetComponent(out ItemPickup pickup))
         {
-            currentItem = interactable;
-        }
-    }
-
-    private void OnTriggerExit(Collider other)
-    {
-        if (currentItem == null) return;
-
-        // 나가는 오브젝트가 현재 아이템과 같은 경우에만 해제
-        if (other.TryGetComponent(out IInteractable interactable) && ReferenceEquals(interactable, currentItem))
-        {
-            currentItem = null;
+            currentPickup = pickup;
         }
     }
     
-    // 트리거 범위 안에 아이템이 있으면 E키 입력시 Interact 호출
-    public void TryPickup()
+    private void OnTriggerExit(Collider other)
     {
-        if (currentItem == null) return;
+        if (currentPickup == null) return;
 
-        currentItem.Interact(gameObject);
-        currentItem = null;
+        if (other.TryGetComponent(out ItemPickup pickup) && ReferenceEquals(pickup, currentPickup))
+        {
+            currentPickup = null;
+        }
+    }
+    
+    /// <summary>
+    /// E 키 입력 시 호출. 트리거 안에 있는 바닥 아이템을 수동으로 수집.
+    /// </summary>
+    public bool TryPickup()
+    {
+        if (currentPickup == null) return false;
+
+        currentPickup.Collect(gameObject);
+
+        if (logPickup)
+        {
+            Debug.Log("[PlayerItemCollector] 트리거 아이템 수집 완료");
+        }
+
+        currentPickup = null;
+        return true;
     }
 }

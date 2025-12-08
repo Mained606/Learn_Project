@@ -27,8 +27,14 @@ public class InputManager : Singleton<InputManager>, IInputReader
 
 
         // 단발 입력들
-        controls.Player.Interact.performed += ctx => TryFire(OnInteractEvent);
-        controls.Player.InventoryToggle.performed += ctx => TryFire(OnInventoryToggleEvent);
+        // 인터랙트는 인벤토리 컨텍스트에서도 허용
+        controls.Player.Interact.performed += ctx => TryFire(OnInteractEvent, false, true);
+        // 인벤토리 토글은 컨텍스트와 무관하게 항상 허용
+        controls.Player.InventoryToggle.performed += ctx =>
+        {
+            Debug.Log("[InputManager] InventoryToggle 입력 감지");
+            TryFire(OnInventoryToggleEvent, true);
+        };
         
         // 아직 키 바인딩 전이라 주석 처리함
         // controls.Player.DialogueNext.performed += ctx => TryFire(OnDialogueNextEvent);
@@ -52,9 +58,15 @@ public class InputManager : Singleton<InputManager>, IInputReader
     }
 
     // 컨텍스트에 따라 단발 입력 차단
-    private void TryFire(System.Action action)
+    private void TryFire(System.Action action, bool ignoreContext = false, bool allowInventoryContext = false)
     {
         if (action == null) return;
+
+        if (ignoreContext)
+        {
+            action?.Invoke();
+            return;
+        }
 
         // 입력 허용 조건
         switch (CurrentContext)
@@ -64,6 +76,10 @@ public class InputManager : Singleton<InputManager>, IInputReader
                 break;
 
             case InputContext.Inventory:
+                if (allowInventoryContext)
+                    action?.Invoke();
+                break;
+
             case InputContext.UI:
             case InputContext.Dialogue:
             case InputContext.Locked:
