@@ -72,7 +72,10 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
 
         if (quantityText != null)
         {
-            quantityText.text = $"x{itemData.quantity}";
+            if (itemData.stackable && itemData.quantity > 1)
+                quantityText.text = $"x{itemData.quantity}";
+            else
+                quantityText.text = "";
         }
     }
 

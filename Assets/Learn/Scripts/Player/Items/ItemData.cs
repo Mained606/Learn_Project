@@ -14,13 +14,19 @@ public class ItemData
 
     // Addressables/리소스 키 등 아이콘 식별용 문자열
     public string iconKey;
+    public ItemType itemType;
+    public bool stackable;
+    public int maxStack;
 
-    public ItemData(string itemId, string displayName, string description, int quantity = 1, string iconKey = "")
+    public ItemData(string itemId, string displayName, string description, int quantity = 1, string iconKey = "", ItemType itemType = ItemType.Misc, bool stackable = true, int maxStack = 99)
     {
         this.itemId = itemId;
         this.displayName = displayName;
         this.description = description;
         this.quantity = quantity;
         this.iconKey = iconKey;
+        this.itemType = itemType;
+        this.stackable = stackable;
+        this.maxStack = stackable ? maxStack : 1;
     }
 }

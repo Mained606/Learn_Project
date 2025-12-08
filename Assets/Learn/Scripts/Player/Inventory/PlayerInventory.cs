@@ -88,29 +88,50 @@ public class PlayerInventory : MonoBehaviour
 
         EnsureCapacity();
 
-        ItemData existing = items.Find(x => x != null && x.itemId == itemData.itemId);
+        int maxStack = itemData.stackable ? (itemData.maxStack > 0 ? itemData.maxStack : 99) : 1;
+        int remaining = itemData.quantity;
+        bool addedAny = false;
 
-        if (existing != null)
+        // 1) 기존 스택 채우기
+        for (int i = 0; i < items.Count && remaining > 0; i++)
         {
-            existing.quantity += itemData.quantity;
-            LogPickup(itemData);
+            ItemData slot = items[i];
+            if (slot == null) continue;
+            if (slot.itemId != itemData.itemId) continue;
+
+            int canAdd = Mathf.Max(0, maxStack - slot.quantity);
+            if (canAdd <= 0) continue;
+
+            int toAdd = Mathf.Min(canAdd, remaining);
+            slot.quantity += toAdd;
+            remaining -= toAdd;
+            addedAny = true;
+        }
+
+        // 2) 빈 슬롯에 새 스택 생성
+        for (int i = 0; i < items.Count && remaining > 0; i++)
+        {
+            if (items[i] != null) continue;
+
+            int toAdd = Mathf.Min(maxStack, remaining);
+            ItemData stored = new ItemData(itemData.itemId, itemData.displayName, itemData.description, toAdd, itemData.iconKey, itemData.itemType, itemData.stackable, maxStack);
+            items[i] = stored;
+            remaining -= toAdd;
+            addedAny = true;
+        }
+
+        if (remaining > 0)
+        {
+            Debug.LogWarning("[PlayerInventory] 인벤토리 슬롯이 부족하여 일부 아이템을 추가하지 못했습니다.");
+        }
+
+        if (addedAny)
+        {
+            LogPickup(new ItemData(itemData.itemId, itemData.displayName, itemData.description, itemData.quantity - remaining, itemData.iconKey, itemData.itemType, itemData.stackable, maxStack));
             RaiseChanged();
-            return true;
         }
 
-        int emptyIndex = items.FindIndex(x => x == null);
-
-        if (emptyIndex == -1)
-        {
-            Debug.LogWarning("[PlayerInventory] 인벤토리 슬롯이 가득 찼습니다.");
-            return false;
-        }
-
-        ItemData stored = new ItemData(itemData.itemId, itemData.displayName, itemData.description, itemData.quantity, itemData.iconKey);
-        items[emptyIndex] = stored;
-        LogPickup(itemData);
-        RaiseChanged();
-        return true;
+        return addedAny;
     }
 
     /// <summary>
@@ -125,6 +146,7 @@ public class PlayerInventory : MonoBehaviour
         }
 
         extraSlots += amount;
+        EnsureCapacity();
         RaiseChanged();
         return true;
     }

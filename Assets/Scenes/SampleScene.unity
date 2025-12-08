@@ -320,7 +320,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
   itemDefinition: {fileID: 11400000, guid: a5f4fae42c9114b78838bb0c1db6b89b, type: 2}
-  quantity: 3
+  quantity: 120
 --- !u!65 &290928386
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1113,7 +1113,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
   itemDefinition: {fileID: 11400000, guid: 03f55a563741f4b4382e9b5729e50978, type: 2}
-  quantity: 1
+  quantity: 2
 --- !u!1 &918881840
 GameObject:
   m_ObjectHideFlags: 0
