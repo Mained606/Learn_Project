@@ -31,8 +31,21 @@ public class ItemPickup : MonoBehaviour
 
         ItemData runtimeData = itemDefinition.ToItemData(quantity);
 
-        // TODO: 인벤토리 시스템이 준비되면 runtimeData 전달
-        Debug.Log($"[ItemPickup] {collector.name} collected {runtimeData.displayName} x{runtimeData.quantity}");
+        PlayerInventory inventory = collector.GetComponent<PlayerInventory>();
+        if (inventory == null)
+        {
+            Debug.LogWarning("[ItemPickup] PlayerInventory를 찾을 수 없어 수집을 건너뜁니다.");
+            return;
+        }
+
+        bool added = inventory.TryAddItem(runtimeData);
+        if (!added)
+        {
+            Debug.LogWarning("[ItemPickup] 인벤토리에 추가하지 못했습니다.");
+            return;
+        }
+
+        Debug.Log($"[ItemPickup] {collector.name} 인벤토리에 {runtimeData.displayName} x{runtimeData.quantity} 추가");
 
         Destroy(gameObject);
     }

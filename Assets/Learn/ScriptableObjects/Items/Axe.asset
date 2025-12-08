@@ -10,8 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61f33b57a06c74ef39b7ffaccfd21495, type: 3}
-  m_Name: TestItem
+  m_Name: Axe
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
-  itemId: 1001
-  displayName: Health Potion
-  description: Health Potion Test
+  itemId: 1002
+  iconKey: 1002
+  displayName: Basic_Axe
+  description: Basic_Axe
+  icon: {fileID: 21300000, guid: 719c2201c2f5f6c4aafffaeb5abdf5f9, type: 3}

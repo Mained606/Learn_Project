@@ -12,11 +12,15 @@ public class ItemData
     public string description;
     public int quantity;
 
-    public ItemData(string itemId, string displayName, string description, int quantity = 1)
+    // Addressables/리소스 키 등 아이콘 식별용 문자열
+    public string iconKey;
+
+    public ItemData(string itemId, string displayName, string description, int quantity = 1, string iconKey = "")
     {
         this.itemId = itemId;
         this.displayName = displayName;
         this.description = description;
         this.quantity = quantity;
+        this.iconKey = iconKey;
     }
 }

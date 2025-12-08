@@ -130,9 +130,10 @@ GameObject:
   - component: {fileID: 5608428114599988348}
   - component: {fileID: 3703531057901100854}
   - component: {fileID: 2115827666151891703}
+  - component: {fileID: 1774804171762241802}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -297,9 +298,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactDistance: 2
-  interactLayer:
+  interactLayerMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1536
+  currentTargetName: 
 --- !u!114 &5608428114599988348
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -312,6 +314,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5f5b26db15cef4ab0a453809b7b02a53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemCollector
+  logPickup: 1
 --- !u!114 &3703531057901100854
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -324,6 +327,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ba7f2a0599344ef0af1b86e219b1dc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerStateMachine
+  currentStateName: 
 --- !u!114 &2115827666151891703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -339,3 +343,18 @@ MonoBehaviour:
   maxHP: 100
   currentHP: 0
   attack: 10
+--- !u!114 &1774804171762241802
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6468606849387616589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 746b8c8fe75847dcbbfe27c961331289, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
+  baseSlots: 99
+  extraSlots: 0
+  logPickup: 1
