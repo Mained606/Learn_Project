@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
   itemId: 1002
   iconKey: 1002
+  itemType: 1
+  stackable: 1
+  maxStack: 99
   displayName: Basic_Axe
   description: Basic_Axe
   icon: {fileID: 21300000, guid: 719c2201c2f5f6c4aafffaeb5abdf5f9, type: 3}

@@ -186,4 +186,44 @@ public class PlayerInventory : MonoBehaviour
         items[index] = item;
         RaiseChanged();
     }
+
+    /// <summary>
+    /// 스택을 분할하여 다른 빈 슬롯에 새 스택을 만든다.
+    /// </summary>
+    public bool TrySplitStack(int sourceIndex, int splitCount)
+    {
+        EnsureCapacity();
+
+        if (sourceIndex < 0 || sourceIndex >= CurrentSlotCapacity) return false;
+
+        ItemData source = items[sourceIndex];
+        if (source == null) return false;
+        if (!source.stackable || source.quantity <= 1) return false;
+        if (splitCount <= 0 || splitCount >= source.quantity) return false;
+
+        int emptyIndex = items.FindIndex(i => i == null);
+        if (emptyIndex == -1)
+        {
+            Debug.LogWarning("[PlayerInventory] 빈 슬롯이 없어 분할에 실패했습니다.");
+            return false;
+        }
+
+        // 원본 감소
+        source.quantity -= splitCount;
+
+        // 새 스택 생성
+        ItemData newStack = new ItemData(
+            source.itemId,
+            source.displayName,
+            source.description,
+            splitCount,
+            source.iconKey,
+            source.itemType,
+            source.stackable,
+            source.maxStack);
+
+        items[emptyIndex] = newStack;
+        RaiseChanged();
+        return true;
+    }
 }
