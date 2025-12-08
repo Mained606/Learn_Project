@@ -615,7 +615,7 @@ GameObject:
   - component: {fileID: 874116353}
   - component: {fileID: 874116352}
   - component: {fileID: 874116356}
-  m_Layer: 11
+  m_Layer: 0
   m_Name: TestItem
   m_TagString: Item
   m_Icon: {fileID: 0}
@@ -726,7 +726,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b70511ebe5f48b79ce335bac9eab0c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
-  itemName: Potion
+  itemDefinition: {fileID: 11400000, guid: 03f55a563741f4b4382e9b5729e50978, type: 2}
+  quantity: 1
 --- !u!1 &1386691123
 GameObject:
   m_ObjectHideFlags: 0
@@ -853,7 +854,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5105496564097401612, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}
       propertyPath: interactLayerMask.m_Bits
-      value: 3584
+      value: 1536
       objectReference: {fileID: 0}
     - target: {fileID: 6468606849387616589, guid: 283fd6420b0d44b85b6dd44076858644, type: 3}
       propertyPath: m_Name
