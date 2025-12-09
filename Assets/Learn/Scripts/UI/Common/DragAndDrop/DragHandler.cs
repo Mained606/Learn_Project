@@ -36,7 +36,6 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
 
         canvasGroup.alpha = 0.7f;
         canvasGroup.blocksRaycasts = false;
-
         CreatePreview(eventData);
     }
 
@@ -75,7 +74,21 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         object destPayload = destination.GetPayload();
         int destCount = destination.GetCount();
 
-        // 스왑 시도
+        // 같은 타입이면 우선 병합 시도 (가능한 만큼만 추가)
+        if (destPayload != null &&
+            destPayload.GetType() == payload.GetType())
+        {
+            int acceptableMerge = Mathf.Max(0, destination.MaxAcceptable(payload));
+            int toTransferMerge = Mathf.Min(acceptableMerge, count);
+            if (toTransferMerge > 0)
+            {
+                source.Remove(toTransferMerge);
+                destination.Add(payload, toTransferMerge);
+                return;
+            }
+        }
+
+        // 스왑 시도 (또는 완전 이동)
         bool canSwap = destination.MaxAcceptable(payload) >= count &&
                        source.MaxAcceptable(destPayload) >= destCount;
 

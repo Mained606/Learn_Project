@@ -15,8 +15,12 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private RectTransform contentRoot;
     [SerializeField] private InventorySlotView slotPrefab;
     [SerializeField] private Canvas rootCanvas;
+    [SerializeField] private InventoryContextMenu contextMenu;
+    [SerializeField] private TooltipPresenter tooltipPresenter;
+    [SerializeField] private InventoryDetailPanel detailPanel;
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
+    private InventorySlotView currentDetailSlot;
 
     public PlayerInventory Inventory => playerInventory;
 
@@ -25,6 +29,10 @@ public class InventoryUI : MonoBehaviour
         // 캔버스가 지정되지 않은 경우 상위에서 찾아 설정
         if (rootCanvas == null)
             rootCanvas = GetComponentInParent<Canvas>();
+
+        // 컨텍스트 메뉴에 자기 참조 전달
+        if (contextMenu != null)
+            contextMenu.Initialize(this);
     }
 
     private void OnEnable()
@@ -33,6 +41,12 @@ public class InventoryUI : MonoBehaviour
 
         playerInventory.OnInventoryChanged += Refresh;
         Refresh(playerInventory.Items);
+
+        // 패널이 열릴 때 컨텍스트/툴팁/상세 초기화
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+        detailPanel?.Hide();
+        currentDetailSlot = null;
     }
 
     private void OnDisable()
@@ -66,7 +80,16 @@ public class InventoryUI : MonoBehaviour
                 slot.Bind(this, i, data, def, rootCanvas);
             else
                 slot.BindEmpty(this, i, rootCanvas);
+
+            // 컨텍스트 메뉴/툴팁 주입
+            if (contextMenu != null)
+                slot.SetContextMenu(contextMenu);
+            if (tooltipPresenter != null)
+                slot.SetTooltipPresenter(tooltipPresenter);
+            if (detailPanel != null)
+                slot.SetDetailPanel(detailPanel);
         }
+
     }
 
     // 슬롯 수를 데이터에 맞춰 조정
@@ -87,6 +110,97 @@ public class InventoryUI : MonoBehaviour
             {
                 slotViews[i].gameObject.SetActive(active);
             }
+        }
+    }
+
+    // 컨텍스트 메뉴에서 호출될 Drop/ Split 훅 (현재는 로그만)
+    public void RequestDrop(InventorySlotView slot)
+    {
+        if (slot == null) return;
+
+        // TODO: Drop 로직(바닥에 스폰) 추가 예정
+        Debug.Log("[InventoryUI] Drop 요청 - 추후 구현 필요");
+        HideDetail();
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+    }
+
+    public void RequestSplit(InventorySlotView slot)
+    {
+        if (slot == null) return;
+
+        if (slot.GetPayload() is not ItemData item || item.quantity <= 1)
+        {
+            Debug.LogWarning("[InventoryUI] 분할할 수 없는 스택입니다.");
+            return;
+        }
+
+        // 간단한 분할: 절반을 새로운 슬롯에 시도
+        int half = item.quantity / 2;
+        Debug.Log($"[InventoryUI] Split 요청: {item.displayName} {item.quantity} -> {half} / {item.quantity - half}");
+
+        bool success = playerInventory.TrySplitStack(slot.Index, half);
+        if (!success)
+        {
+            Debug.LogWarning("[InventoryUI] 분할에 실패했습니다. (빈 슬롯 필요)");
+        }
+
+        HideDetail();
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+    }
+
+    public void RequestUse(InventorySlotView slot)
+    {
+        if (slot == null) return;
+        Debug.Log("[InventoryUI] Use 요청 - 아이템 사용 로직은 추후 구현");
+        HideDetail();
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+    }
+
+    public void RequestEquip(InventorySlotView slot)
+    {
+        if (slot == null) return;
+        Debug.Log("[InventoryUI] Equip 요청 - 장착 시스템은 추후 구현");
+        HideDetail();
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+    }
+
+    public void ShowDetail(InventorySlotView slot)
+    {
+        if (detailPanel == null || slot == null) return;
+
+        ItemData item = slot.GetPayload() as ItemData;
+        ItemDefinition def = null;
+        if (item != null && definitionDatabase != null)
+            def = definitionDatabase.GetDefinition(item.itemId);
+
+        detailPanel.Show(item, def);
+        currentDetailSlot = slot;
+        // 상세 패널이 열릴 때 컨텍스트 메뉴/툴팁 닫기
+        contextMenu?.Hide();
+        tooltipPresenter?.Hide();
+    }
+
+    public void HideDetail()
+    {
+        detailPanel?.Hide();
+        currentDetailSlot = null;
+    }
+
+    public void ToggleDetail(InventorySlotView slot)
+    {
+        if (detailPanel == null || slot == null) return;
+
+        if (currentDetailSlot == slot && detailPanel.gameObject.activeSelf)
+        {
+            HideDetail();
+        }
+        else
+        {
+            ShowDetail(slot);
         }
     }
 

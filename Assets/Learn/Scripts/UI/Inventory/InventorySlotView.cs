@@ -1,17 +1,19 @@
 using TMPro;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 /// <summary>
 /// 인벤토리 슬롯 UI. 아이콘/수량 표시와 드래그 앤 드롭 데이터 제공/수신을 처리한다.
 /// </summary>
 [RequireComponent(typeof(CanvasGroup))]
-public class InventorySlotView : MonoBehaviour, IDragSlot
+public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("UI 참조")]
     [SerializeField] private Image iconImage;
     [SerializeField] private TextMeshProUGUI quantityText;
-
     private InventoryUI owner;
     private int slotIndex;
     private ItemData itemData;
@@ -20,6 +22,11 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
     private DragHandler dragHandler;
+    private InventoryContextMenu contextMenu;
+    private TooltipPresenter tooltipPresenter;
+    private InventoryDetailPanel detailPanel;
+    private Coroutine tooltipRoutine;
+    private bool pointerInside;
 
     private void Awake()
     {
@@ -79,6 +86,8 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
         }
     }
 
+    // 툴팁/컨텍스트 메뉴는 IPointerEnter/Exit/Click으로 처리
+
     private void SetupDragHandler()
     {
         if (dragHandler == null)
@@ -90,6 +99,41 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
         {
             if (rootCanvas != null)
                 dragHandler.SetOverrideCanvas(rootCanvas);
+        }
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            if (itemData != null && contextMenu != null)
+            {
+                tooltipPresenter?.Hide();
+                CancelTooltipRoutine();
+                contextMenu.Show(this, eventData.position);
+            }
+        }
+        else if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            // Shift+좌클릭으로 빠른 분할
+            if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+            {
+                if (itemData != null && itemData.stackable && itemData.quantity > 1)
+                {
+                    owner?.RequestSplit(this);
+                }
+            }
+            else
+            {
+                owner?.ToggleDetail(this);
+            }
+        }
+        else
+        {
+            // 다른 버튼 클릭 시 컨텍스트/툴팁 닫기
+            contextMenu?.Hide();
+            tooltipPresenter?.Hide();
+            owner?.HideDetail();
         }
     }
 
@@ -122,8 +166,23 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
 
     public int MaxAcceptable(object payload)
     {
-        // 인벤토리는 어떤 아이템이든 수용 가능하도록 설정 (스왑/이동 허용)
-        return payload is ItemData ? int.MaxValue : 0;
+        if (payload is not ItemData incoming) return 0;
+
+        // 비어 있는 슬롯이면 자유롭게 수용
+        if (itemData == null) return int.MaxValue;
+
+        // 같은 아이템이면 스택 가능 여부와 남은 공간 체크
+        if (incoming.itemId == itemData.itemId)
+        {
+            if (!incoming.stackable) return 0;
+
+            int maxStack = GetMaxStack(incoming);
+            int space = Mathf.Max(0, maxStack - itemData.quantity);
+            return space;
+        }
+
+        // 다른 아이템이면 스왑/교체 허용
+        return int.MaxValue;
     }
 
     public void Add(object payload, int count)
@@ -134,18 +193,104 @@ public class InventorySlotView : MonoBehaviour, IDragSlot
         // 동일 아이디는 스택 합산, 아니면 교체
         if (itemData != null && itemData.itemId == item.itemId)
         {
-            itemData.quantity += count;
+            if (!itemData.stackable) return;
+
+            int maxStack = GetMaxStack(itemData);
+            int addable = Mathf.Min(count, Mathf.Max(0, maxStack - itemData.quantity));
+            if (addable <= 0) return;
+
+            itemData.quantity += addable;
             owner.Inventory.UpdateSlot(slotIndex, itemData);
         }
         else
         {
-            ItemData copy = new ItemData(item.itemId, item.displayName, item.description, count, item.iconKey);
+            int maxStack = GetMaxStack(item);
+            int clamped = item.stackable ? Mathf.Min(count, maxStack) : 1;
+            ItemData copy = new ItemData(item.itemId, item.displayName, item.description, clamped, item.iconKey, item.itemType, item.stackable, item.maxStack);
             owner.Inventory.UpdateSlot(slotIndex, copy);
         }
     }
 
-    public Image GetPreviewImage()
+    public Image GetPreviewImage() => iconImage;
+    public void SetContextMenu(InventoryContextMenu menu) => contextMenu = menu;
+    public void SetTooltipPresenter(TooltipPresenter presenter) => tooltipPresenter = presenter;
+    public void SetDetailPanel(InventoryDetailPanel panel) => detailPanel = panel;
+    private int GetMaxStack(ItemData data)
     {
-        return iconImage;
+        if (data == null) return 0;
+
+        if (!data.stackable) return 1;
+
+        // 정의 우선, 없으면 데이터의 maxStack, 둘 다 없으면 99
+        int definedMax = (itemDefinition != null && itemDefinition.ItemId == data.itemId && itemDefinition.MaxStack > 0)
+            ? itemDefinition.MaxStack
+            : 0;
+        int dataMax = data.maxStack > 0 ? data.maxStack : 0;
+
+        int max = definedMax > 0 ? definedMax : (dataMax > 0 ? dataMax : 99);
+        return Mathf.Max(1, max);
+    }
+
+    public int Index => slotIndex;
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        pointerInside = true;
+        if (itemData != null && tooltipPresenter != null)
+        {
+            // 컨텍스트 메뉴가 열려 있으면 툴팁은 표시하지 않음
+            if (contextMenu != null && contextMenu.IsVisible) return;
+
+            tooltipRoutine = StartCoroutine(ShowTooltipDelayed(eventData.position));
+        }
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        pointerInside = false;
+        CancelTooltipRoutine();
+        if (tooltipPresenter != null)
+            tooltipPresenter.Hide();
+        // 패널 밖으로 나갈 때 컨텍스트 메뉴는 그대로 두고, 상세는 유지
+    }
+
+    private IEnumerator ShowTooltipDelayed(Vector3 position)
+    {
+        float delay = tooltipPresenter != null ? tooltipPresenter.HoverDelay : 0f;
+        if (delay > 0f)
+            yield return new WaitForSeconds(delay);
+
+        if (pointerInside && itemData != null && tooltipPresenter != null)
+        {
+            tooltipPresenter.Show(BuildTooltipData(), Input.mousePosition);
+        }
+        tooltipRoutine = null;
+    }
+
+    private void CancelTooltipRoutine()
+    {
+        if (tooltipRoutine != null)
+        {
+            StopCoroutine(tooltipRoutine);
+            tooltipRoutine = null;
+        }
+    }
+
+    private TooltipData BuildTooltipData()
+    {
+        var lines = new System.Collections.Generic.List<TooltipStatLine>();
+        string typeLabel = itemData != null ? itemData.itemType.ToString() : "";
+        if (!string.IsNullOrEmpty(typeLabel))
+            lines.Add(new TooltipStatLine("Type", typeLabel));
+
+        if (itemData != null && itemData.stackable && itemData.quantity > 1)
+            lines.Add(new TooltipStatLine("Stack", $"x{itemData.quantity}"));
+
+        return new TooltipData(
+            itemData?.displayName ?? "",
+            itemDefinition != null ? itemDefinition.Description : "",
+            itemData?.description ?? "",
+            itemDefinition != null ? itemDefinition.Icon : null,
+            lines);
     }
 }
