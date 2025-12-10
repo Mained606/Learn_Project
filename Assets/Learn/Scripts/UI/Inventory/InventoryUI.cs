@@ -16,7 +16,7 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private InventorySlotView slotPrefab;
     [SerializeField] private Canvas rootCanvas;
     [SerializeField] private InventoryContextMenu contextMenu;
-    [SerializeField] private TooltipPresenter tooltipPresenter;
+    [SerializeField] private InventoryTooltip tooltip;
     [SerializeField] private InventoryDetailPanel detailPanel;
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
@@ -44,7 +44,7 @@ public class InventoryUI : MonoBehaviour
 
         // 패널이 열릴 때 컨텍스트/툴팁/상세 초기화
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
         detailPanel?.Hide();
         currentDetailSlot = null;
     }
@@ -84,8 +84,8 @@ public class InventoryUI : MonoBehaviour
             // 컨텍스트 메뉴/툴팁 주입
             if (contextMenu != null)
                 slot.SetContextMenu(contextMenu);
-            if (tooltipPresenter != null)
-                slot.SetTooltipPresenter(tooltipPresenter);
+            if (tooltip != null)
+                slot.SetTooltip(tooltip);
             if (detailPanel != null)
                 slot.SetDetailPanel(detailPanel);
         }
@@ -122,7 +122,7 @@ public class InventoryUI : MonoBehaviour
         Debug.Log("[InventoryUI] Drop 요청 - 추후 구현 필요");
         HideDetail();
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
     }
 
     public void RequestSplit(InventorySlotView slot)
@@ -147,7 +147,7 @@ public class InventoryUI : MonoBehaviour
 
         HideDetail();
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
     }
 
     public void RequestUse(InventorySlotView slot)
@@ -156,7 +156,7 @@ public class InventoryUI : MonoBehaviour
         Debug.Log("[InventoryUI] Use 요청 - 아이템 사용 로직은 추후 구현");
         HideDetail();
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
     }
 
     public void RequestEquip(InventorySlotView slot)
@@ -165,7 +165,7 @@ public class InventoryUI : MonoBehaviour
         Debug.Log("[InventoryUI] Equip 요청 - 장착 시스템은 추후 구현");
         HideDetail();
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
     }
 
     public void ShowDetail(InventorySlotView slot)
@@ -181,7 +181,7 @@ public class InventoryUI : MonoBehaviour
         currentDetailSlot = slot;
         // 상세 패널이 열릴 때 컨텍스트 메뉴/툴팁 닫기
         contextMenu?.Hide();
-        tooltipPresenter?.Hide();
+        tooltip?.Hide();
     }
 
     public void HideDetail()

@@ -402,7 +402,8 @@ GameObject:
   - component: {fileID: 146281746}
   - component: {fileID: 146281748}
   - component: {fileID: 146281747}
-  - component: {fileID: 146281749}
+  - component: {fileID: 146281750}
+  - component: {fileID: 146281751}
   m_Layer: 5
   m_Name: tooltip
   m_TagString: Untagged
@@ -422,10 +423,10 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1558423723}
   - {fileID: 1691457579}
   - {fileID: 2045121003}
   - {fileID: 649640514}
-  - {fileID: 1558423723}
   m_Father: {fileID: 1890236148}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -471,7 +472,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 146281745}
   m_CullTransparentMesh: 1
---- !u!114 &146281749
+--- !u!225 &146281750
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 146281745}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
+--- !u!114 &146281751
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -4396,7 +4409,7 @@ MonoBehaviour:
   slotPrefab: {fileID: 465318338397811507, guid: 84a0778498c3f4590b9e69ffab42b94d, type: 3}
   rootCanvas: {fileID: 1805272902}
   contextMenu: {fileID: 1324269041}
-  tooltip: {fileID: 146281749}
+  tooltip: {fileID: 146281751}
   detailPanel: {fileID: 1050674024}
 --- !u!1 &1920013148
 GameObject:
