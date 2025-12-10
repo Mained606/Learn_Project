@@ -1,6 +1,5 @@
 using TMPro;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -23,7 +22,7 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
     private CanvasGroup canvasGroup;
     private DragHandler dragHandler;
     private InventoryContextMenu contextMenu;
-    private TooltipPresenter tooltipPresenter;
+    private InventoryTooltip tooltip;
     private InventoryDetailPanel detailPanel;
     private Coroutine tooltipRoutine;
     private bool pointerInside;
@@ -108,7 +107,7 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         {
             if (itemData != null && contextMenu != null)
             {
-                tooltipPresenter?.Hide();
+                tooltip?.Hide();
                 CancelTooltipRoutine();
                 contextMenu.Show(this, eventData.position);
             }
@@ -132,7 +131,7 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         {
             // 다른 버튼 클릭 시 컨텍스트/툴팁 닫기
             contextMenu?.Hide();
-            tooltipPresenter?.Hide();
+            tooltip?.Hide();
             owner?.HideDetail();
         }
     }
@@ -211,10 +210,6 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         }
     }
 
-    public Image GetPreviewImage() => iconImage;
-    public void SetContextMenu(InventoryContextMenu menu) => contextMenu = menu;
-    public void SetTooltipPresenter(TooltipPresenter presenter) => tooltipPresenter = presenter;
-    public void SetDetailPanel(InventoryDetailPanel panel) => detailPanel = panel;
     private int GetMaxStack(ItemData data)
     {
         if (data == null) return 0;
@@ -236,7 +231,7 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
     public void OnPointerEnter(PointerEventData eventData)
     {
         pointerInside = true;
-        if (itemData != null && tooltipPresenter != null)
+        if (itemData != null && tooltip != null)
         {
             // 컨텍스트 메뉴가 열려 있으면 툴팁은 표시하지 않음
             if (contextMenu != null && contextMenu.IsVisible) return;
@@ -249,20 +244,20 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
     {
         pointerInside = false;
         CancelTooltipRoutine();
-        if (tooltipPresenter != null)
-            tooltipPresenter.Hide();
+        if (tooltip != null)
+            tooltip.Hide();
         // 패널 밖으로 나갈 때 컨텍스트 메뉴는 그대로 두고, 상세는 유지
     }
 
     private IEnumerator ShowTooltipDelayed(Vector3 position)
     {
-        float delay = tooltipPresenter != null ? tooltipPresenter.HoverDelay : 0f;
+        float delay = tooltip != null ? tooltip.HoverDelay : 0f;
         if (delay > 0f)
             yield return new WaitForSeconds(delay);
 
-        if (pointerInside && itemData != null && tooltipPresenter != null)
+        if (pointerInside && itemData != null && tooltip != null)
         {
-            tooltipPresenter.Show(BuildTooltipData(), Input.mousePosition);
+            tooltip.Show(itemData, itemDefinition, Input.mousePosition);
         }
         tooltipRoutine = null;
     }
@@ -276,21 +271,8 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         }
     }
 
-    private TooltipData BuildTooltipData()
-    {
-        var lines = new System.Collections.Generic.List<TooltipStatLine>();
-        string typeLabel = itemData != null ? itemData.itemType.ToString() : "";
-        if (!string.IsNullOrEmpty(typeLabel))
-            lines.Add(new TooltipStatLine("Type", typeLabel));
-
-        if (itemData != null && itemData.stackable && itemData.quantity > 1)
-            lines.Add(new TooltipStatLine("Stack", $"x{itemData.quantity}"));
-
-        return new TooltipData(
-            itemData?.displayName ?? "",
-            itemDefinition != null ? itemDefinition.Description : "",
-            itemData?.description ?? "",
-            itemDefinition != null ? itemDefinition.Icon : null,
-            lines);
-    }
+    public Image GetPreviewImage() => iconImage;
+    public void SetContextMenu(InventoryContextMenu menu) => contextMenu = menu;
+    public void SetTooltip(InventoryTooltip tip) => tooltip = tip;
+    public void SetDetailPanel(InventoryDetailPanel panel) => detailPanel = panel;
 }
