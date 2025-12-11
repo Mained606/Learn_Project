@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 스크롤 뷰 기반 인벤토리 UI. 아이콘, 수량 표시 및 드래그 앤 드롭 순서 변경을 지원.
-/// UI 문자열은 영어, 주석/로그는 한글로 유지.
 /// </summary>
 public class InventoryUI : MonoBehaviour
 {
@@ -18,6 +17,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private InventoryContextMenu contextMenu;
     [SerializeField] private InventoryTooltip tooltip;
     [SerializeField] private InventoryDetailPanel detailPanel;
+    [Header("아이템 사용/장착 처리기")]
+    [SerializeField] private ItemActionResolver itemActionResolver;
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
     private InventorySlotView currentDetailSlot;
@@ -113,13 +114,14 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    // 컨텍스트 메뉴에서 호출될 Drop/ Split 훅 (현재는 로그만)
+    // 컨텍스트 메뉴에서 호출될 Drop/ Split/Use/Equip 훅
     public void RequestDrop(InventorySlotView slot)
     {
-        if (slot == null) return;
+        if (slot == null || itemActionResolver == null) return;
+        ItemData data = slot.GetPayload() as ItemData;
+        if (!itemActionResolver.CanDrop(data)) return;
 
-        // TODO: Drop 로직(바닥에 스폰) 추가 예정
-        Debug.Log("[InventoryUI] Drop 요청 - 추후 구현 필요");
+        itemActionResolver.Drop(data, playerInventory, slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -152,8 +154,11 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestUse(InventorySlotView slot)
     {
-        if (slot == null) return;
-        Debug.Log("[InventoryUI] Use 요청 - 아이템 사용 로직은 추후 구현");
+        if (slot == null || itemActionResolver == null) return;
+        ItemData data = slot.GetPayload() as ItemData;
+        if (!itemActionResolver.CanConsume(data)) return;
+
+        itemActionResolver.Consume(data, playerInventory, slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -161,8 +166,11 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestEquip(InventorySlotView slot)
     {
-        if (slot == null) return;
-        Debug.Log("[InventoryUI] Equip 요청 - 장착 시스템은 추후 구현");
+        if (slot == null || itemActionResolver == null) return;
+        ItemData data = slot.GetPayload() as ItemData;
+        if (!itemActionResolver.CanEquip(data)) return;
+
+        itemActionResolver.Equip(data, playerInventory, slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();

@@ -12,11 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61f33b57a06c74ef39b7ffaccfd21495, type: 3}
   m_Name: BasicArmor
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
-  itemId: 1001
-  iconKey: 1001
+  itemId: 2001
+  iconKey: 2001
   itemType: 2
   stackable: 0
   maxStack: 1
   displayName: Basic Armor
-  description: Basic Armor Test Item
+  description: Basic Armor Equip Item Test
   icon: {fileID: 21300000, guid: d659f7396cd57754eba78763cf986c51, type: 3}

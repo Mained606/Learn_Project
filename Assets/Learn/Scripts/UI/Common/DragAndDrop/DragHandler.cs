@@ -74,17 +74,21 @@ public class DragHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndD
         object destPayload = destination.GetPayload();
         int destCount = destination.GetCount();
 
-        // 같은 타입이면 우선 병합 시도 (가능한 만큼만 추가)
-        if (destPayload != null &&
-            destPayload.GetType() == payload.GetType())
+        // 같은 아이템(ItemData)이고 스택 가능하면 병합 시도
+        if (payload is ItemData srcItem && destPayload is ItemData destItem)
         {
-            int acceptableMerge = Mathf.Max(0, destination.MaxAcceptable(payload));
-            int toTransferMerge = Mathf.Min(acceptableMerge, count);
-            if (toTransferMerge > 0)
+            bool sameId = destItem.itemId == srcItem.itemId;
+            bool stackable = destItem.stackable && srcItem.stackable;
+            if (sameId && stackable)
             {
-                source.Remove(toTransferMerge);
-                destination.Add(payload, toTransferMerge);
-                return;
+                int acceptableMerge = Mathf.Max(0, destination.MaxAcceptable(payload));
+                int toTransferMerge = Mathf.Min(acceptableMerge, count);
+                if (toTransferMerge > 0)
+                {
+                    source.Remove(toTransferMerge);
+                    destination.Add(payload, toTransferMerge);
+                    return;
+                }
             }
         }
 
