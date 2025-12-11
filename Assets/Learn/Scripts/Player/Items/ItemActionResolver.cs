@@ -11,11 +11,15 @@ public class ItemActionResolver : ScriptableObject
     public bool CanEquip(ItemData data) => data != null && data.itemType == ItemType.Equipment;
     public bool CanDrop(ItemData data) => data != null && data.itemType != ItemType.Quest;
 
-    public void Consume(ItemData data, PlayerInventory inventory, int slotIndex)
+    public void Consume(ItemData data, ItemDefinition definition, PlayerInventory inventory, PlayerStats stats, int slotIndex)
     {
         if (data == null || inventory == null) return;
-        Debug.Log($"[ItemActionResolver] {data.displayName} 사용");
-        // TODO: 실제 효과 적용(회복/버프 등)
+        int heal = definition != null ? definition.HealAmount : 0;
+        Debug.Log($"[ItemActionResolver] {data.displayName} 사용 (회복: {heal})");
+
+        if (heal > 0 && stats != null)
+            stats.Heal(heal);
+
         data.quantity -= 1;
         if (data.quantity <= 0)
             inventory.ClearSlot(slotIndex);
@@ -23,11 +27,24 @@ public class ItemActionResolver : ScriptableObject
             inventory.UpdateSlot(slotIndex, data);
     }
 
-    public void Equip(ItemData data, PlayerInventory inventory, int slotIndex)
+    public void Equip(ItemData data, ItemDefinition definition, PlayerInventory inventory, PlayerStats stats, int slotIndex)
     {
         if (data == null || inventory == null) return;
-        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 요청");
-        // TODO: 장비 시스템 연동 후 실제 장착 처리
+        int atkBonus = definition != null ? definition.AttackBonus : 0;
+        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 (공격력 +{atkBonus})");
+        if (stats != null && atkBonus != 0)
+            stats.attack += atkBonus;
+
+        // TODO: 장비 슬롯/모델 연동 추가 필요
+    }
+
+    public void Unequip(ItemData data, ItemDefinition definition, PlayerStats stats)
+    {
+        if (data == null) return;
+        int atkBonus = definition != null ? definition.AttackBonus : 0;
+        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 해제 (공격력 -{atkBonus})");
+        if (stats != null && atkBonus != 0)
+            stats.attack -= atkBonus;
     }
 
     public void Drop(ItemData data, PlayerInventory inventory, int slotIndex, GameObject dropPrefab = null)

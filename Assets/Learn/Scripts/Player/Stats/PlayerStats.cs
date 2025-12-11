@@ -21,4 +21,11 @@ public class PlayerStats : MonoBehaviour
             // 사망 처리 이벤트
         }
     }
+
+    public void Heal(int amount)
+    {
+        if (amount <= 0) return;
+        currentHP = Mathf.Clamp(currentHP + amount, 0, maxHP);
+        Debug.Log($"[PlayerStats] HP 회복: +{amount} → {currentHP}/{maxHP}");
+    }
 }

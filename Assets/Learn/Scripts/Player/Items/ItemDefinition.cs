@@ -12,8 +12,13 @@ public class ItemDefinition : ScriptableObject
     
     [Header("타입/정책")]
     [SerializeField] private ItemType itemType = ItemType.Misc;
+    [SerializeField] private EquipmentSlot equipmentSlot = EquipmentSlot.None;
     [SerializeField] private bool stackable = true;
     [SerializeField] private int maxStack = 99;
+
+    [Header("효과 수치")]
+    [SerializeField] private int healAmount = 0;
+    [SerializeField] private int attackBonus = 0;
 
     [Header("표시 정보")]
     [SerializeField] private string displayName;
@@ -25,9 +30,12 @@ public class ItemDefinition : ScriptableObject
     public string Description => description;
     public string IconKey => iconKey;
     public Sprite Icon => icon;
-    public ItemType ItemType => itemType;
-    public bool Stackable => stackable;
-    public int MaxStack => maxStack;
+public ItemType ItemType => itemType;
+    public EquipmentSlot EquipmentSlot => equipmentSlot;
+public bool Stackable => stackable;
+public int MaxStack => maxStack;
+    public int HealAmount => healAmount;
+    public int AttackBonus => attackBonus;
 
     /// <summary>
     /// 런타임에서 사용할 순수 데이터로 변환.

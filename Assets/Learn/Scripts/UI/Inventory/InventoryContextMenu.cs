@@ -1,37 +1,29 @@
-using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 /// <summary>
 /// 인벤토리 슬롯 우클릭/메뉴 표시.
-/// Drop/Split/Use/Equip 액션을 제공하며, 실제 로직은 InventoryUI로 위임.
+/// 동적 액션 목록으로 버튼을 생성한다.
 /// </summary>
 public class InventoryContextMenu : MonoBehaviour
 {
     [SerializeField] private GameObject panel;
     [SerializeField] private RectTransform buttonContainer;
-    [SerializeField] private Button dropButton;
-    [SerializeField] private Button splitButton;
-    [SerializeField] private Button useButton;
-    [SerializeField] private Button equipButton;
+    [SerializeField] private ContextMenuButtonView buttonPrefab;
     [SerializeField] private Vector2 offset = new Vector2(90f, -90f);
     [SerializeField] private Vector2 padding = new Vector2(10f, 10f);
 
+    private readonly List<ContextMenuButtonView> buttonPool = new();
     private InventorySlotView targetSlot;
     private InventoryUI inventoryUI;
 
     private void Awake()
     {
-        // 인벤토리 UI 참조가 비어 있으면 상위에서 자동으로 찾기
         if (inventoryUI == null)
             inventoryUI = GetComponentInParent<InventoryUI>();
 
         if (panel != null) panel.SetActive(false);
-        if (dropButton != null) dropButton.onClick.AddListener(HandleDrop);
-        if (splitButton != null) splitButton.onClick.AddListener(HandleSplit);
-        if (useButton != null) useButton.onClick.AddListener(HandleUse);
-        if (equipButton != null) equipButton.onClick.AddListener(HandleEquip);
     }
 
     public void Initialize(InventoryUI ui)
@@ -44,27 +36,40 @@ public class InventoryContextMenu : MonoBehaviour
         if (inventoryUI == null)
             inventoryUI = GetComponentInParent<InventoryUI>();
 
+        // 패널이 꺼져 있으면 먼저 켜서 레이아웃 계산을 보장
+        if (panel != null && !panel.activeSelf)
+            panel.SetActive(true);
+
         targetSlot = slot;
         ItemData item = slot?.GetPayload() as ItemData;
         ItemType type = item != null ? item.itemType : ItemType.Misc;
         bool canSplit = item != null && item.stackable && item.quantity > 1;
+        bool isEquipped = slot != null && inventoryUI != null && inventoryUI.IsEquipped(slot);
 
-        // 버튼 노출/순서 결정
-        SetButtonActive(useButton, type == ItemType.Consumable);
-        SetButtonActive(equipButton, type == ItemType.Equipment);
-        SetButtonActive(splitButton, canSplit);
-        // 퀘스트 아이템은 드롭 비활성화
-        SetButtonActive(dropButton, type != ItemType.Quest);
+        var actions = new List<ContextMenuAction>();
 
-        // 순서: Use/Eqip -> Split -> Drop
-        int order = 0;
-        if (useButton != null && useButton.gameObject.activeSelf) useButton.transform.SetSiblingIndex(order++);
-        if (equipButton != null && equipButton.gameObject.activeSelf) equipButton.transform.SetSiblingIndex(order++);
-        if (splitButton != null && splitButton.gameObject.activeSelf) splitButton.transform.SetSiblingIndex(order++);
-        if (dropButton != null && dropButton.gameObject.activeSelf) dropButton.transform.SetSiblingIndex(order++);
+        if (type == ItemType.Consumable)
+            actions.Add(new ContextMenuAction("Use", () => { inventoryUI?.RequestUse(targetSlot); Hide(); }));
+
+        if (type == ItemType.Equipment && !isEquipped)
+            actions.Add(new ContextMenuAction("Equip", () => { inventoryUI?.RequestEquip(targetSlot); Hide(); }));
+
+        if (type == ItemType.Equipment && isEquipped)
+            actions.Add(new ContextMenuAction("Unequip", () => { inventoryUI?.RequestUnequip(targetSlot); Hide(); }));
+
+        if (canSplit)
+            actions.Add(new ContextMenuAction("Split", () => { inventoryUI?.RequestSplit(targetSlot); Hide(); }));
+
+        if (type != ItemType.Quest)
+            actions.Add(new ContextMenuAction("Drop", () => { inventoryUI?.RequestDrop(targetSlot); Hide(); }));
+
+        BuildButtons(actions);
 
         if (panel != null)
         {
+            if (buttonContainer != null)
+                LayoutRebuilder.ForceRebuildLayoutImmediate(buttonContainer);
+
             Vector3 targetPos = AdjustToScreen(position + (Vector3)offset);
             panel.transform.position = targetPos;
             panel.SetActive(true);
@@ -78,62 +83,25 @@ public class InventoryContextMenu : MonoBehaviour
             panel.SetActive(false);
     }
 
-    private void HandleDrop()
-    {
-        if (targetSlot == null)
-        {
-            Hide();
-            return;
-        }
-
-        inventoryUI?.RequestDrop(targetSlot);
-        Hide();
-    }
-
-    private void HandleSplit()
-    {
-        Debug.Log("[InventoryContextMenu] Split 클릭");
-
-        if (targetSlot == null)
-        {
-            Hide();
-            return;
-        }
-
-        inventoryUI?.RequestSplit(targetSlot);
-        Hide();
-    }
-
-    private void HandleUse()
-    {
-        if (targetSlot == null)
-        {
-            Hide();
-            return;
-        }
-
-        inventoryUI?.RequestUse(targetSlot);
-        Hide();
-    }
-
-    private void HandleEquip()
-    {
-        if (targetSlot == null)
-        {
-            Hide();
-            return;
-        }
-
-        inventoryUI?.RequestEquip(targetSlot);
-        Hide();
-    }
-
     public bool IsVisible => panel != null && panel.activeSelf;
 
-    private void SetButtonActive(Button button, bool active)
+    private void BuildButtons(List<ContextMenuAction> actions)
     {
-        if (button != null)
-            button.gameObject.SetActive(active);
+        if (buttonContainer == null || buttonPrefab == null) return;
+
+        while (buttonPool.Count < actions.Count)
+        {
+            var btn = Instantiate(buttonPrefab, buttonContainer);
+            buttonPool.Add(btn);
+        }
+
+        for (int i = 0; i < buttonPool.Count; i++)
+        {
+            bool active = i < actions.Count;
+            buttonPool[i].gameObject.SetActive(active);
+            if (active)
+                buttonPool[i].Bind(actions[i]);
+        }
     }
 
     private Vector3 AdjustToScreen(Vector3 position)

@@ -17,8 +17,8 @@ public class InventoryUI : MonoBehaviour
     [SerializeField] private InventoryContextMenu contextMenu;
     [SerializeField] private InventoryTooltip tooltip;
     [SerializeField] private InventoryDetailPanel detailPanel;
-    [Header("아이템 사용/장착 처리기")]
-    [SerializeField] private ItemActionResolver itemActionResolver;
+    [Header("아이템 액션 런너 (플레이어 도메인)")]
+    [SerializeField] private ItemActionRunner itemActionRunner;
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
     private InventorySlotView currentDetailSlot;
@@ -117,11 +117,8 @@ public class InventoryUI : MonoBehaviour
     // 컨텍스트 메뉴에서 호출될 Drop/ Split/Use/Equip 훅
     public void RequestDrop(InventorySlotView slot)
     {
-        if (slot == null || itemActionResolver == null) return;
-        ItemData data = slot.GetPayload() as ItemData;
-        if (!itemActionResolver.CanDrop(data)) return;
-
-        itemActionResolver.Drop(data, playerInventory, slot.Index);
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Drop(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -154,11 +151,8 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestUse(InventorySlotView slot)
     {
-        if (slot == null || itemActionResolver == null) return;
-        ItemData data = slot.GetPayload() as ItemData;
-        if (!itemActionResolver.CanConsume(data)) return;
-
-        itemActionResolver.Consume(data, playerInventory, slot.Index);
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Use(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -166,14 +160,26 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestEquip(InventorySlotView slot)
     {
-        if (slot == null || itemActionResolver == null) return;
-        ItemData data = slot.GetPayload() as ItemData;
-        if (!itemActionResolver.CanEquip(data)) return;
-
-        itemActionResolver.Equip(data, playerInventory, slot.Index);
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Equip(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
+    }
+
+    public void RequestUnequip(InventorySlotView slot)
+    {
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Unequip(slot.Index);
+        HideDetail();
+        contextMenu?.Hide();
+        tooltip?.Hide();
+    }
+
+    public bool IsEquipped(InventorySlotView slot)
+    {
+        if (slot == null || itemActionRunner == null) return false;
+        return itemActionRunner.IsEquipped(slot.Index);
     }
 
     public void ShowDetail(InventorySlotView slot)
