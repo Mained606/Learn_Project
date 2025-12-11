@@ -131,6 +131,7 @@ GameObject:
   - component: {fileID: 3703531057901100854}
   - component: {fileID: 2115827666151891703}
   - component: {fileID: 1774804171762241802}
+  - component: {fileID: 9063891392590901987}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -301,6 +302,7 @@ MonoBehaviour:
   interactLayerMask:
     serializedVersion: 2
     m_Bits: 1536
+  useCameraForward: 0
   currentTargetName: 
 --- !u!114 &5608428114599988348
 MonoBehaviour:
@@ -358,3 +360,17 @@ MonoBehaviour:
   baseSlots: 99
   extraSlots: 0
   logPickup: 1
+--- !u!114 &9063891392590901987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6468606849387616589}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0768c606566d24382b56f5a85a88ff06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ItemActionRunner
+  definitionDatabase: {fileID: 11400000, guid: c450792ff6549466a9bc2c48b26bcc04, type: 2}
+  actionResolver: {fileID: 11400000, guid: 1ca3d26dcd08949bf9fec92e911581ad, type: 2}

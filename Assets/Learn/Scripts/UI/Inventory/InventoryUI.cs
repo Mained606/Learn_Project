@@ -5,27 +5,30 @@ using UnityEngine.UI;
 
 /// <summary>
 /// 스크롤 뷰 기반 인벤토리 UI. 아이콘, 수량 표시 및 드래그 앤 드롭 순서 변경을 지원.
-/// UI 문자열은 영어, 주석/로그는 한글로 유지.
 /// </summary>
 public class InventoryUI : MonoBehaviour
 {
     [Header("참조")]
     [SerializeField] private PlayerInventory playerInventory;
-    [SerializeField] private ItemDefinitionDatabase definitionDatabase;
     [SerializeField] private RectTransform contentRoot;
     [SerializeField] private InventorySlotView slotPrefab;
     [SerializeField] private Canvas rootCanvas;
     [SerializeField] private InventoryContextMenu contextMenu;
     [SerializeField] private InventoryTooltip tooltip;
     [SerializeField] private InventoryDetailPanel detailPanel;
+    [Header("아이템 액션 런너 (플레이어 도메인)")]
+    [SerializeField] private ItemActionRunner itemActionRunner;
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
     private InventorySlotView currentDetailSlot;
+    private ItemManager itemManager;
 
     public PlayerInventory Inventory => playerInventory;
 
     private void Awake()
     {
+        itemManager = ItemManager.Instance;
+
         // 캔버스가 지정되지 않은 경우 상위에서 찾아 설정
         if (rootCanvas == null)
             rootCanvas = GetComponentInParent<Canvas>();
@@ -73,8 +76,8 @@ public class InventoryUI : MonoBehaviour
             ItemData data = (items != null && i < items.Count) ? items[i] : null;
             ItemDefinition def = null;
 
-            if (data != null && definitionDatabase != null)
-                def = definitionDatabase.GetDefinition(data.itemId);
+            if (data != null && itemManager != null)
+                def = itemManager.GetDefinition(data.itemId);
 
             if (data != null)
                 slot.Bind(this, i, data, def, rootCanvas);
@@ -113,13 +116,11 @@ public class InventoryUI : MonoBehaviour
         }
     }
 
-    // 컨텍스트 메뉴에서 호출될 Drop/ Split 훅 (현재는 로그만)
+    // 컨텍스트 메뉴에서 호출될 Drop/ Split/Use/Equip 훅
     public void RequestDrop(InventorySlotView slot)
     {
-        if (slot == null) return;
-
-        // TODO: Drop 로직(바닥에 스폰) 추가 예정
-        Debug.Log("[InventoryUI] Drop 요청 - 추후 구현 필요");
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Drop(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -152,8 +153,8 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestUse(InventorySlotView slot)
     {
-        if (slot == null) return;
-        Debug.Log("[InventoryUI] Use 요청 - 아이템 사용 로직은 추후 구현");
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Use(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
@@ -161,11 +162,26 @@ public class InventoryUI : MonoBehaviour
 
     public void RequestEquip(InventorySlotView slot)
     {
-        if (slot == null) return;
-        Debug.Log("[InventoryUI] Equip 요청 - 장착 시스템은 추후 구현");
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Equip(slot.Index);
         HideDetail();
         contextMenu?.Hide();
         tooltip?.Hide();
+    }
+
+    public void RequestUnequip(InventorySlotView slot)
+    {
+        if (slot == null || itemActionRunner == null) return;
+        itemActionRunner.Unequip(slot.Index);
+        HideDetail();
+        contextMenu?.Hide();
+        tooltip?.Hide();
+    }
+
+    public bool IsEquipped(InventorySlotView slot)
+    {
+        if (slot == null || itemActionRunner == null) return false;
+        return itemActionRunner.IsEquipped(slot.Index);
     }
 
     public void ShowDetail(InventorySlotView slot)
@@ -174,8 +190,8 @@ public class InventoryUI : MonoBehaviour
 
         ItemData item = slot.GetPayload() as ItemData;
         ItemDefinition def = null;
-        if (item != null && definitionDatabase != null)
-            def = definitionDatabase.GetDefinition(item.itemId);
+        if (item != null && itemManager != null)
+            def = itemManager.GetDefinition(item.itemId);
 
         detailPanel.Show(item, def);
         currentDetailSlot = slot;

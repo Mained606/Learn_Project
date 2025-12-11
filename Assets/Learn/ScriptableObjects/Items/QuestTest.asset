@@ -10,16 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 61f33b57a06c74ef39b7ffaccfd21495, type: 3}
-  m_Name: Axe
+  m_Name: QuestTest
   m_EditorClassIdentifier: Assembly-CSharp::ItemDefinition
-  itemId: 2003
-  iconKey: 2003
-  itemType: 2
-  equipmentSlot: 6
-  stackable: 0
-  maxStack: 1
-  healAmount: 0
-  attackBonus: 20
+  itemId: 3001
+  iconKey: 3001
+  itemType: 3
+  stackable: 1
+  maxStack: 99
   displayName: Basic_Axe
   description: Basic_Axe Quest Item Test
   icon: {fileID: 21300000, guid: 719c2201c2f5f6c4aafffaeb5abdf5f9, type: 3}
