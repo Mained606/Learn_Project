@@ -7,10 +7,12 @@ using UnityEngine;
 public class ItemManager : Singleton<ItemManager>, IItemDefinitionProvider
 {
     [SerializeField] private ItemDefinitionDatabase definitionDatabase;
+    [SerializeField] private ScriptableObject definitionProviderOverride; // IItemDefinitionProvider 구현체(SO/Addressables 등)
     [SerializeField] private GameObject dropPrefab;
     [SerializeField] private MonoBehaviour dropSpawnerBehaviour; // IItemDropSpawner 구현체
 
     private IItemDropSpawner dropSpawner;
+    private IItemDefinitionProvider definitionProvider;
 
     public event Action<ItemData> OnItemDropped;
     public event Action<ItemData> OnItemConsumed;
@@ -20,8 +22,8 @@ public class ItemManager : Singleton<ItemManager>, IItemDefinitionProvider
     public ItemDefinition GetDefinition(string itemId)
     {
         if (string.IsNullOrEmpty(itemId)) return null;
-        if (definitionDatabase == null) return null;
-        return definitionDatabase.GetDefinition(itemId);
+        EnsureProvider();
+        return definitionProvider != null ? definitionProvider.GetDefinition(itemId) : null;
     }
 
     /// <summary>
@@ -65,4 +67,24 @@ public class ItemManager : Singleton<ItemManager>, IItemDefinitionProvider
     public void RaiseConsumed(ItemData data) => OnItemConsumed?.Invoke(data);
     public void RaiseEquipped(ItemData data) => OnItemEquipped?.Invoke(data);
     public void RaiseUnequipped(ItemData data) => OnItemUnequipped?.Invoke(data);
+
+    private void EnsureProvider()
+    {
+        if (definitionProvider != null) return;
+
+        // Override가 있으면 사용, 없으면 ScriptableObject DB 사용
+        if (definitionProviderOverride is IItemDefinitionProvider overrideProvider)
+        {
+            definitionProvider = overrideProvider;
+            return;
+        }
+
+        if (definitionDatabase != null)
+        {
+            definitionProvider = definitionDatabase;
+            return;
+        }
+
+        Debug.LogWarning("[ItemManager] ItemDefinition provider가 설정되지 않았습니다.");
+    }
 }
