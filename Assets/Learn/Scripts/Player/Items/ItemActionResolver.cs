@@ -25,6 +25,8 @@ public class ItemActionResolver : ScriptableObject
             inventory.ClearSlot(slotIndex);
         else
             inventory.UpdateSlot(slotIndex, data);
+
+        ItemManager.Instance?.RaiseConsumed(data);
     }
 
     public void Equip(ItemData data, ItemDefinition definition, PlayerInventory inventory, PlayerStats stats, int slotIndex)
@@ -36,6 +38,7 @@ public class ItemActionResolver : ScriptableObject
             stats.attack += atkBonus;
 
         // TODO: 장비 슬롯/모델 연동 추가 필요
+        ItemManager.Instance?.RaiseEquipped(data);
     }
 
     public void Unequip(ItemData data, ItemDefinition definition, PlayerStats stats)
@@ -45,6 +48,8 @@ public class ItemActionResolver : ScriptableObject
         Debug.Log($"[ItemActionResolver] {data.displayName} 장착 해제 (공격력 -{atkBonus})");
         if (stats != null && atkBonus != 0)
             stats.attack -= atkBonus;
+
+        ItemManager.Instance?.RaiseUnequipped(data);
     }
 
     public void Drop(ItemData data, PlayerInventory inventory, int slotIndex, GameObject dropPrefab = null)
@@ -53,5 +58,7 @@ public class ItemActionResolver : ScriptableObject
         Debug.Log($"[ItemActionResolver] {data.displayName} 드롭 요청");
         // TODO: dropPrefab 사용해 바닥에 스폰, 현재는 단순 제거
         inventory.ClearSlot(slotIndex);
+
+        ItemManager.Instance?.RaiseDropped(data);
     }
 }

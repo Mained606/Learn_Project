@@ -12,6 +12,12 @@ public class ItemPickup : MonoBehaviour
     public ItemDefinition Definition => itemDefinition;
     public int Quantity => quantity;
 
+    public void Setup(ItemDefinition definition, int quantity)
+    {
+        this.itemDefinition = definition;
+        this.quantity = quantity;
+    }
+
     // 바닥 아이템 태그 강제
     private void Reset()
     {

@@ -9,7 +9,6 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerStats))]
 public class ItemActionRunner : MonoBehaviour
 {
-    [SerializeField] private ItemDefinitionDatabase definitionDatabase;
     [SerializeField] private ItemActionResolver actionResolver;
 
     private PlayerInventory inventory;
@@ -37,7 +36,7 @@ public class ItemActionRunner : MonoBehaviour
         if (data == null) return;
         if (!actionResolver.CanConsume(data)) return;
 
-        ItemDefinition def = definitionDatabase != null ? definitionDatabase.GetDefinition(data.itemId) : null;
+        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
         actionResolver.Consume(data, def, inventory, stats, slotIndex);
     }
 
@@ -49,7 +48,7 @@ public class ItemActionRunner : MonoBehaviour
         if (data == null) return;
         if (!actionResolver.CanEquip(data)) return;
 
-        ItemDefinition def = definitionDatabase != null ? definitionDatabase.GetDefinition(data.itemId) : null;
+        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
         EquipmentSlot eqSlotType = def != null ? def.EquipmentSlot : EquipmentSlot.None;
 
         // 동일 아이템 다시 장착 시 무시
@@ -74,7 +73,7 @@ public class ItemActionRunner : MonoBehaviour
             Unequip(prevSlotForSlot);
         }
 
-        ItemDefinition defEquip = definitionDatabase != null ? definitionDatabase.GetDefinition(data.itemId) : null;
+        ItemDefinition defEquip = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
         actionResolver.Equip(data, defEquip, inventory, stats, slotIndex);
         equippedByItemId[data.itemId] = slotIndex;
         if (eqSlotType != EquipmentSlot.None)
@@ -107,7 +106,7 @@ public class ItemActionRunner : MonoBehaviour
         if (!equippedByItemId.TryGetValue(data.itemId, out int eqSlot) || eqSlot != slotIndex)
             return;
 
-        ItemDefinition def = definitionDatabase != null ? definitionDatabase.GetDefinition(data.itemId) : null;
+        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
 
         actionResolver.Unequip(data, def, stats);
         equippedByItemId.Remove(data.itemId);
@@ -125,7 +124,7 @@ public class ItemActionRunner : MonoBehaviour
         if (equippedByItemId.TryGetValue(data.itemId, out int eqSlot) && eqSlot == slotIndex)
             return true;
 
-        ItemDefinition def = definitionDatabase != null ? definitionDatabase.GetDefinition(data.itemId) : null;
+        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
         EquipmentSlot slotType = def != null ? def.EquipmentSlot : EquipmentSlot.None;
         return slotType != EquipmentSlot.None && equippedBySlot.TryGetValue(slotType, out int slotIdx) && slotIdx == slotIndex;
     }

@@ -6,7 +6,7 @@ using UnityEngine;
 /// Addressables/Firestore 매핑 전 단계에서 에디터 설정으로 사용.
 /// </summary>
 [CreateAssetMenu(menuName = "Learn/Items/ItemDefinitionDatabase")]
-public class ItemDefinitionDatabase : ScriptableObject
+public class ItemDefinitionDatabase : ScriptableObject, IItemDefinitionProvider
 {
     [SerializeField] private List<ItemDefinition> definitions = new List<ItemDefinition>();
 
