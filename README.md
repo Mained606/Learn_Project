@@ -50,6 +50,7 @@ Assets/
 
 - **아이템 액션 / 매니저**
   - ItemManager(싱글톤): 아이템 정의 조회, 드롭 스폰(기본 Instantiate 또는 IItemDropSpawner 구현), 글로벌 이벤트 발행
+    - definitionProviderOverride 슬롯을 두어 ScriptableObject DB 외에 Addressables/JSON Provider로 교체 가능(비우면 기본 DB 사용)
   - ItemActionRunner: 플레이어별 아이템 효과 적용/장착 상태 추적(정의는 Manager에서 조회)
   - ItemActionResolver: Consume/Equip/Unequip/Drop 시 HP 회복, 공격력 보너스 등 적용
 
@@ -60,6 +61,7 @@ Assets/
 
 ## 세팅 가이드
 - 씬에 `ItemManager` 배치 → DefinitionDatabase, DropPrefab(옵션), DropSpawnerBehaviour(옵션, IItemDropSpawner 구현) 할당
+  - definitionProviderOverride는 비워두면 ScriptableObject DB 사용, Addressables/JSON Provider SO가 있으면 여기 연결
 - 플레이어 : `ItemActionRunner`(Resolver), `PlayerInventory`, `PlayerStats`
 - `InventoryUI` : SlotPrefab/ContentRoot/Canvas, ContextMenu/Tooltip/DetailPanel, ItemActionRunner 연결
 - 컨텍스트 메뉴 : panel, buttonContainer, buttonPrefab(ContextMenuButtonView) 연결; Vertical Layout + Content Size Fitter 권장
