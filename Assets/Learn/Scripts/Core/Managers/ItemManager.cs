@@ -4,10 +4,13 @@ using UnityEngine;
 /// <summary>
 /// 아이템 도메인 중앙 관리. 정의 조회, 드롭 스폰, 글로벌 이벤트 브로드캐스트 담당.
 /// </summary>
-public class ItemManager : Singleton<ItemManager>
+public class ItemManager : Singleton<ItemManager>, IItemDefinitionProvider
 {
     [SerializeField] private ItemDefinitionDatabase definitionDatabase;
     [SerializeField] private GameObject dropPrefab;
+    [SerializeField] private MonoBehaviour dropSpawnerBehaviour; // IItemDropSpawner 구현체
+
+    private IItemDropSpawner dropSpawner;
 
     public event Action<ItemData> OnItemDropped;
     public event Action<ItemData> OnItemConsumed;
@@ -27,13 +30,26 @@ public class ItemManager : Singleton<ItemManager>
     public void SpawnDrop(ItemData data, Vector3 position)
     {
         if (data == null) return;
+
+        // 커스텀 스포너가 있으면 그것을 사용
+        if (dropSpawner == null && dropSpawnerBehaviour != null)
+            dropSpawner = dropSpawnerBehaviour as IItemDropSpawner;
+
+        if (dropSpawner != null)
+        {
+            dropSpawner.Spawn(data, position);
+            OnItemDropped?.Invoke(data);
+            return;
+        }
+
+        // 기본 드롭(프리팹 Instantiate)
         if (dropPrefab == null)
         {
             Debug.LogWarning("[ItemManager] DropPrefab이 설정되지 않았습니다.");
             return;
         }
 
-        GameObject go = Instantiate(dropPrefab, position, Quaternion.identity);
+        GameObject go = UnityEngine.Object.Instantiate(dropPrefab, position, Quaternion.identity);
         ItemPickup pickup = go.GetComponent<ItemPickup>();
         if (pickup != null)
         {

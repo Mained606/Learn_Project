@@ -10,7 +10,6 @@ public class InventoryUI : MonoBehaviour
 {
     [Header("참조")]
     [SerializeField] private PlayerInventory playerInventory;
-    [SerializeField] private ItemDefinitionDatabase definitionDatabase;
     [SerializeField] private RectTransform contentRoot;
     [SerializeField] private InventorySlotView slotPrefab;
     [SerializeField] private Canvas rootCanvas;
@@ -22,11 +21,14 @@ public class InventoryUI : MonoBehaviour
 
     private readonly List<InventorySlotView> slotViews = new List<InventorySlotView>();
     private InventorySlotView currentDetailSlot;
+    private ItemManager itemManager;
 
     public PlayerInventory Inventory => playerInventory;
 
     private void Awake()
     {
+        itemManager = ItemManager.Instance;
+
         // 캔버스가 지정되지 않은 경우 상위에서 찾아 설정
         if (rootCanvas == null)
             rootCanvas = GetComponentInParent<Canvas>();
@@ -74,8 +76,8 @@ public class InventoryUI : MonoBehaviour
             ItemData data = (items != null && i < items.Count) ? items[i] : null;
             ItemDefinition def = null;
 
-            if (data != null && definitionDatabase != null)
-                def = definitionDatabase.GetDefinition(data.itemId);
+            if (data != null && itemManager != null)
+                def = itemManager.GetDefinition(data.itemId);
 
             if (data != null)
                 slot.Bind(this, i, data, def, rootCanvas);
@@ -188,8 +190,8 @@ public class InventoryUI : MonoBehaviour
 
         ItemData item = slot.GetPayload() as ItemData;
         ItemDefinition def = null;
-        if (item != null && definitionDatabase != null)
-            def = definitionDatabase.GetDefinition(item.itemId);
+        if (item != null && itemManager != null)
+            def = itemManager.GetDefinition(item.itemId);
 
         detailPanel.Show(item, def);
         currentDetailSlot = slot;
