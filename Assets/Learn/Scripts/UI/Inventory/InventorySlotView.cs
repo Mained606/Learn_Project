@@ -189,7 +189,7 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         if (owner == null || owner.Inventory == null) return;
         if (payload is not ItemData item) return;
 
-        // 동일 아이디는 스택 합산, 아니면 교체
+        // 동일 아이디는 스택 합산, 아니면 참조 이동/교체
         if (itemData != null && itemData.itemId == item.itemId)
         {
             if (!itemData.stackable) return;
@@ -205,8 +205,18 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         {
             int maxStack = GetMaxStack(item);
             int clamped = item.stackable ? Mathf.Min(count, maxStack) : 1;
-            ItemData copy = new ItemData(item.itemId, item.displayName, item.description, clamped, item.iconKey, item.itemType, item.stackable, item.maxStack);
-            owner.Inventory.UpdateSlot(slotIndex, copy);
+
+            // 전체 스택을 이동하는 경우에는 참조를 그대로 사용하여 장착 상태 추적을 유지
+            if (count == item.quantity && clamped == item.quantity)
+            {
+                owner.Inventory.UpdateSlot(slotIndex, item);
+            }
+            else
+            {
+                // 부분 이동 또는 스택 제한 시 새 인스턴스로 생성
+                ItemData copy = new ItemData(item.itemId, item.displayName, item.description, clamped, item.iconKey, item.itemType, item.stackable, item.maxStack);
+                owner.Inventory.UpdateSlot(slotIndex, copy);
+            }
         }
     }
 

@@ -17,7 +17,7 @@ Assets/
    │  │  ├─ Events/              # GameEventBus
    │  │  ├─ Input/               # PlayerControls.inputactions
    │  │  ├─ Interfaces/          # IGameEvent, IInputReader, IInteractable
-   │  │  └─ Managers/            # InputManager, UIManager, ItemManager, IItemDropSpawner, Singleton
+   │  │  └─ Managers/            # InputManager, UIManager, ItemManager, InventoryManager, IItemDropSpawner, Singleton
    │  ├─ Player/
    │  │  ├─ Controller/          # PlayerController
    │  │  ├─ Interaction/         # PlayerInteractor
@@ -47,6 +47,7 @@ Assets/
     - PlayerInventory와 UI는 Definition을 통해 아이콘/설명 등 클라이언트 리소스를 조회
   - 인벤토리: PlayerInventory가 스택/병합/분할/슬롯 관리, DragHandler+IDragSlot으로 병합/교환 처리
   - 장비: EquipmentSlot별로 한 개만 장착, 같은 부위에 새 장비 장착 시 기존 장비 자동 해제
+  - InventoryManager: 여러 인벤토리 등록/조회, 인벤토리 간 스택 이동 뼈대 제공
 
 - **아이템 액션 / 매니저**
   - ItemManager(싱글톤): 아이템 정의 조회, 드롭 스폰(기본 Instantiate 또는 IItemDropSpawner 구현), 글로벌 이벤트 발행
@@ -63,6 +64,7 @@ Assets/
 - 씬에 `ItemManager` 배치 → DefinitionDatabase, DropPrefab(옵션), DropSpawnerBehaviour(옵션, IItemDropSpawner 구현) 할당
   - definitionProviderOverride는 비워두면 ScriptableObject DB 사용, Addressables/JSON Provider SO가 있으면 여기 연결
 - 플레이어 : `ItemActionRunner`(Resolver), `PlayerInventory`, `PlayerStats`
+- 다중 인벤토리 사용 시 `InventoryManager`에 식별자와 함께 인벤토리 등록(기본은 player 자동 등록 가능)
 - `InventoryUI` : SlotPrefab/ContentRoot/Canvas, ContextMenu/Tooltip/DetailPanel, ItemActionRunner 연결
 - 컨텍스트 메뉴 : panel, buttonContainer, buttonPrefab(ContextMenuButtonView) 연결; Vertical Layout + Content Size Fitter 권장
 - 드롭 프리팹 : `ItemPickup` 포함, `ItemManager` SpawnDrop 시 `Setup` 호출
