@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -13,8 +14,12 @@ public class ItemActionRunner : MonoBehaviour
 
     private PlayerInventory inventory;
     private PlayerStats stats;
-    private readonly System.Collections.Generic.Dictionary<string, int> equippedByItemId = new();
-    private readonly System.Collections.Generic.Dictionary<EquipmentSlot, int> equippedBySlot = new();
+    // 장착된 아이템 인스턴스 추적(참조 기준)
+    private readonly HashSet<ItemData> equippedItems = new();
+    // 장착 부위 -> 아이템 인스턴스
+    private readonly Dictionary<EquipmentSlot, ItemData> equippedBySlot = new();
+    [Header("디버그용 장착 리스트(읽기 전용)")]
+    [SerializeField] private List<string> equippedDebug = new();
 
     private void Awake()
     {
@@ -48,36 +53,32 @@ public class ItemActionRunner : MonoBehaviour
         if (data == null) return;
         if (!actionResolver.CanEquip(data)) return;
 
-        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
+        ItemDefinition def = ResolveDefinition(data);
         EquipmentSlot eqSlotType = def != null ? def.EquipmentSlot : EquipmentSlot.None;
 
-        // 동일 아이템 다시 장착 시 무시
-        if (equippedByItemId.TryGetValue(data.itemId, out int prevSlotForItem))
+        if (eqSlotType == EquipmentSlot.None)
         {
-            if (prevSlotForItem == slotIndex)
-            {
-                Debug.LogWarning("[ItemActionRunner] 이미 해당 아이템이 장착된 슬롯입니다.");
-                return;
-            }
-            Unequip(prevSlotForItem);
+            Debug.LogWarning("[ItemActionRunner] 장착 불가 아이템입니다.");
+            return;
         }
 
-        // 동일 부위에 다른 아이템이 장착되어 있으면 해제
-        if (eqSlotType != EquipmentSlot.None && equippedBySlot.TryGetValue(eqSlotType, out int prevSlotForSlot))
+        // 동일 아이템 인스턴스가 이미 장착되어 있으면 무시
+        if (equippedItems.Contains(data))
         {
-            if (prevSlotForSlot == slotIndex)
-            {
-                Debug.LogWarning("[ItemActionRunner] 이미 해당 부위에 장착된 슬롯입니다.");
-                return;
-            }
-            Unequip(prevSlotForSlot);
+            Debug.LogWarning("[ItemActionRunner] 이미 장착된 아이템입니다.");
+            return;
         }
 
-        ItemDefinition defEquip = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
-        actionResolver.Equip(data, defEquip, inventory, stats, slotIndex);
-        equippedByItemId[data.itemId] = slotIndex;
-        if (eqSlotType != EquipmentSlot.None)
-            equippedBySlot[eqSlotType] = slotIndex;
+        // 동일 부위에 다른 아이템이 장착되어 있으면 먼저 해제
+        if (equippedBySlot.TryGetValue(eqSlotType, out ItemData equippedItem))
+        {
+            UnequipItem(equippedItem);
+        }
+
+        actionResolver.Equip(data, def, inventory, stats, slotIndex);
+        equippedItems.Add(data);
+        equippedBySlot[eqSlotType] = data;
+        RefreshDebugList();
     }
 
     public void Drop(int slotIndex)
@@ -100,20 +101,9 @@ public class ItemActionRunner : MonoBehaviour
         if (actionResolver == null) return;
         if (slotIndex < 0 || slotIndex >= inventory.CurrentSlotCapacity) return;
 
-        // 슬롯에 있는 아이템이 장착 목록에 없으면 패스
         ItemData data = inventory.Items.Count > slotIndex ? inventory.Items[slotIndex] : null;
         if (data == null) return;
-        if (!equippedByItemId.TryGetValue(data.itemId, out int eqSlot) || eqSlot != slotIndex)
-            return;
-
-        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
-
-        actionResolver.Unequip(data, def, stats);
-        equippedByItemId.Remove(data.itemId);
-
-        EquipmentSlot slotType = def != null ? def.EquipmentSlot : EquipmentSlot.None;
-        if (slotType != EquipmentSlot.None && equippedBySlot.TryGetValue(slotType, out int storedSlot) && storedSlot == slotIndex)
-            equippedBySlot.Remove(slotType);
+        UnequipItem(data);
     }
 
     public bool IsEquipped(int slotIndex)
@@ -121,11 +111,43 @@ public class ItemActionRunner : MonoBehaviour
         if (slotIndex < 0 || slotIndex >= inventory.CurrentSlotCapacity) return false;
         ItemData data = inventory.Items.Count > slotIndex ? inventory.Items[slotIndex] : null;
         if (data == null) return false;
-        if (equippedByItemId.TryGetValue(data.itemId, out int eqSlot) && eqSlot == slotIndex)
-            return true;
+        return equippedItems.Contains(data);
+    }
 
-        ItemDefinition def = ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(data.itemId) : null;
+    // 아이템 인스턴스 단위로 장착 해제 처리
+    private void UnequipItem(ItemData item)
+    {
+        if (item == null) return;
+        if (!equippedItems.Contains(item)) return;
+
+        ItemDefinition def = ResolveDefinition(item);
         EquipmentSlot slotType = def != null ? def.EquipmentSlot : EquipmentSlot.None;
-        return slotType != EquipmentSlot.None && equippedBySlot.TryGetValue(slotType, out int slotIdx) && slotIdx == slotIndex;
+
+        actionResolver.Unequip(item, def, stats);
+
+        equippedItems.Remove(item);
+        if (slotType != EquipmentSlot.None && equippedBySlot.TryGetValue(slotType, out ItemData stored) && stored == item)
+        {
+            equippedBySlot.Remove(slotType);
+        }
+        RefreshDebugList();
+    }
+
+    private ItemDefinition ResolveDefinition(ItemData item)
+    {
+        if (item == null) return null;
+        return ItemManager.Instance != null ? ItemManager.Instance.GetDefinition(item.itemId) : null;
+    }
+
+    // 인스펙터에서 장착 상태를 눈으로 확인하기 위한 디버그 리스트 갱신
+    private void RefreshDebugList()
+    {
+        equippedDebug.Clear();
+        foreach (KeyValuePair<EquipmentSlot, ItemData> kv in equippedBySlot)
+        {
+            ItemData data = kv.Value;
+            string name = data != null ? (!string.IsNullOrEmpty(data.displayName) ? data.displayName : data.itemId) : "None";
+            equippedDebug.Add($"{kv.Key}: {name}");
+        }
     }
 }

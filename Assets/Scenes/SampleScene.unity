@@ -2090,6 +2090,51 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemPickup
   itemDefinition: {fileID: 11400000, guid: 03f55a563741f4b4382e9b5729e50978, type: 2}
   quantity: 1
+--- !u!1 &888189939
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 888189940}
+  - component: {fileID: 888189941}
+  m_Layer: 0
+  m_Name: InventoryManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &888189940
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888189939}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &888189941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 888189939}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aea033a8fc92944298b4cdcfc2c011a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
+  defaultInventory: {fileID: 671443788}
 --- !u!1 &918881840
 GameObject:
   m_ObjectHideFlags: 0
@@ -2755,7 +2800,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemManager
   definitionDatabase: {fileID: 11400000, guid: c450792ff6549466a9bc2c48b26bcc04, type: 2}
+  definitionProviderOverride: {fileID: 0}
   dropPrefab: {fileID: 0}
+  dropSpawnerBehaviour: {fileID: 0}
 --- !u!1 &1324269037
 GameObject:
   m_ObjectHideFlags: 0
@@ -3720,7 +3767,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
   playerInventory: {fileID: 671443788}
-  definitionDatabase: {fileID: 11400000, guid: c450792ff6549466a9bc2c48b26bcc04, type: 2}
   contentRoot: {fileID: 918881841}
   slotPrefab: {fileID: 465318338397811507, guid: 84a0778498c3f4590b9e69ffab42b94d, type: 3}
   rootCanvas: {fileID: 1805272902}
@@ -4126,6 +4172,7 @@ SceneRoots:
   - {fileID: 499000568}
   - {fileID: 378966008}
   - {fileID: 1221777951}
+  - {fileID: 888189940}
   - {fileID: 256127487}
   - {fileID: 1386691127}
   - {fileID: 619054798}
