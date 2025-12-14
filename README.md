@@ -46,14 +46,14 @@ Assets/
   - 데이터 분리: ItemData(순수 런타임) / ItemDefinition(SO: heal/attackBonus/EquipmentSlot) / ItemDefinitionDatabase(아이템 ID→Definition 매핑)
     - PlayerInventory와 UI는 Definition을 통해 아이콘/설명 등 클라이언트 리소스를 조회
   - 인벤토리: PlayerInventory가 스택/병합/분할/슬롯 관리, DragHandler+IDragSlot으로 병합/교환 처리
-  - 장비: EquipmentSlot별로 한 개만 장착, 같은 부위에 새 장비 장착 시 기존 장비 자동 해제
+  - 장비: EquipmentSlot별로 한 개만 장착, 같은 부위에 새 장비 장착 시 기존 장비 자동 해제, StatModifier(MaxHP/MaxMP/Attack/AttackSpeed/MoveSpeed/STR/AGI/INT/VIT 등)로 보너스 적용
   - InventoryManager: 여러 인벤토리 등록/조회, 인벤토리 간 스택 이동 뼈대 제공
 
 - **아이템 액션 / 매니저**
   - ItemManager(싱글톤): 아이템 정의 조회, 드롭 스폰(기본 Instantiate 또는 IItemDropSpawner 구현), 글로벌 이벤트 발행
     - definitionProviderOverride 슬롯을 두어 ScriptableObject DB 외에 Addressables/JSON Provider로 교체 가능(비우면 기본 DB 사용)
   - ItemActionRunner: 플레이어별 아이템 효과 적용/장착 상태 추적(정의는 Manager에서 조회)
-  - ItemActionResolver: Consume/Equip/Unequip/Drop 시 HP 회복, 공격력 보너스 등 적용
+  - ItemActionResolver: Consume/Equip/Unequip/Drop 시 HP 회복, StatModifier 적용/회수
 
 - **UI / UX**
   - InventoryUI/SlotView: 인벤토리 데이터를 슬롯에 바인딩하고 Runner에 액션 요청

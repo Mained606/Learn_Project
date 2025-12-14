@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -32,10 +33,10 @@ public class ItemActionResolver : ScriptableObject
     public void Equip(ItemData data, ItemDefinition definition, PlayerInventory inventory, PlayerStats stats, int slotIndex)
     {
         if (data == null || inventory == null) return;
-        int atkBonus = definition != null ? definition.AttackBonus : 0;
-        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 (공격력 +{atkBonus})");
-        if (stats != null && atkBonus != 0)
-            stats.attack += atkBonus;
+        List<StatsModifier> modifiers = BuildModifiers(definition);
+        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 (모디파이어 {modifiers.Count}개 적용)");
+        if (stats != null)
+            stats.ApplyModifiers(modifiers, true);
 
         // TODO: 장비 슬롯/모델 연동 추가 필요
         ItemManager.Instance?.RaiseEquipped(data);
@@ -44,10 +45,10 @@ public class ItemActionResolver : ScriptableObject
     public void Unequip(ItemData data, ItemDefinition definition, PlayerStats stats)
     {
         if (data == null) return;
-        int atkBonus = definition != null ? definition.AttackBonus : 0;
-        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 해제 (공격력 -{atkBonus})");
-        if (stats != null && atkBonus != 0)
-            stats.attack -= atkBonus;
+        List<StatsModifier> modifiers = BuildModifiers(definition);
+        Debug.Log($"[ItemActionResolver] {data.displayName} 장착 해제 (모디파이어 {modifiers.Count}개 회수)");
+        if (stats != null)
+            stats.ApplyModifiers(modifiers, false);
 
         ItemManager.Instance?.RaiseUnequipped(data);
     }
@@ -60,5 +61,29 @@ public class ItemActionResolver : ScriptableObject
         inventory.ClearSlot(slotIndex);
 
         ItemManager.Instance?.RaiseDropped(data);
+    }
+
+    // 정의에서 적용할 모디파이어 리스트를 구성한다. (리스트 복사)
+    private List<StatsModifier> BuildModifiers(ItemDefinition definition)
+    {
+        var list = new List<StatsModifier>();
+        if (definition != null && definition.StatModifiers != null)
+        {
+            foreach (StatsModifier mod in definition.StatModifiers)
+            {
+                if (mod != null)
+                {
+                    list.Add(mod);
+                }
+            }
+        }
+
+        // 기존 attackBonus 필드를 사용하는 정의가 있다면 호환 차원에서 추가
+        if (definition != null && definition.AttackBonus != 0)
+        {
+            list.Add(new StatsModifier { statType = StatType.Attack, amount = definition.AttackBonus });
+        }
+
+        return list;
     }
 }
