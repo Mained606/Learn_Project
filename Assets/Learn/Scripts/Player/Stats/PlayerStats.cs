@@ -19,6 +19,17 @@ public class PlayerStats : MonoBehaviour
     [Header("현재 MP")]
     [SerializeField] private int currentMP;
 
+    [Header("디버그용 최종 스탯(읽기 전용)")]
+    [SerializeField] private int debugMaxHP;
+    [SerializeField] private int debugMaxMP;
+    [SerializeField] private int debugAttack;
+    [SerializeField] private float debugAttackSpeed;
+    [SerializeField] private float debugMoveSpeed;
+    [SerializeField] private int debugStrength;
+    [SerializeField] private int debugAgility;
+    [SerializeField] private int debugIntellect;
+    [SerializeField] private int debugVitality;
+
     // 보너스 스탯 합산용
     private readonly Dictionary<StatType, int> bonusStats = new Dictionary<StatType, int>();
 
@@ -38,6 +49,7 @@ public class PlayerStats : MonoBehaviour
     {
         currentHP = MaxHP;
         currentMP = MaxMP;
+        RefreshDebugStats();
     }
 
     public void TakeDamage(int amount)
@@ -78,6 +90,7 @@ public class PlayerStats : MonoBehaviour
         {
             ApplyModifier(mod, add);
         }
+        RefreshDebugStats();
     }
 
     private void AddBonus(StatType statType, int delta)
@@ -100,5 +113,20 @@ public class PlayerStats : MonoBehaviour
         // 최대 체력이 내려가도 현재 체력이 초과하지 않도록 보정
         currentHP = Mathf.Clamp(currentHP, 0, MaxHP);
         currentMP = Mathf.Clamp(currentMP, 0, MaxMP);
+        RefreshDebugStats();
+    }
+
+    // 인스펙터에서 최종 스탯을 확인할 수 있도록 디버그 필드를 갱신
+    private void RefreshDebugStats()
+    {
+        debugMaxHP = MaxHP;
+        debugMaxMP = MaxMP;
+        debugAttack = Attack;
+        debugAttackSpeed = AttackSpeed;
+        debugMoveSpeed = MoveSpeed;
+        debugStrength = Strength;
+        debugAgility = Agility;
+        debugIntellect = Intellect;
+        debugVitality = Vitality;
     }
 }

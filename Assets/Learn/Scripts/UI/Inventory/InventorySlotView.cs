@@ -173,7 +173,11 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         // 같은 아이템이면 스택 가능 여부와 남은 공간 체크
         if (incoming.itemId == itemData.itemId)
         {
-            if (!incoming.stackable) return 0;
+            if (!incoming.stackable)
+            {
+                // 비스택 장비라도 스왑은 허용하기 위해 최소 1 반환
+                return 1;
+            }
 
             int maxStack = GetMaxStack(incoming);
             int space = Mathf.Max(0, maxStack - itemData.quantity);
@@ -192,7 +196,12 @@ public class InventorySlotView : MonoBehaviour, IDragSlot, IPointerClickHandler,
         // 동일 아이디는 스택 합산, 아니면 참조 이동/교체
         if (itemData != null && itemData.itemId == item.itemId)
         {
-            if (!itemData.stackable) return;
+            if (!itemData.stackable)
+            {
+                // 비스택 동일 아이템은 교체
+                owner.Inventory.UpdateSlot(slotIndex, item);
+                return;
+            }
 
             int maxStack = GetMaxStack(itemData);
             int addable = Mathf.Min(count, Mathf.Max(0, maxStack - itemData.quantity));
