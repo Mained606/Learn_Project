@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -19,6 +20,7 @@ public class ItemDefinition : ScriptableObject
     [Header("효과 수치")]
     [SerializeField] private int healAmount = 0;
     [SerializeField] private int attackBonus = 0;
+    [SerializeField] private List<StatsModifier> statModifiers = new List<StatsModifier>();
 
     [Header("표시 정보")]
     [SerializeField] private string displayName;
@@ -36,6 +38,7 @@ public bool Stackable => stackable;
 public int MaxStack => maxStack;
     public int HealAmount => healAmount;
     public int AttackBonus => attackBonus;
+    public IReadOnlyList<StatsModifier> StatModifiers => statModifiers;
 
     /// <summary>
     /// 런타임에서 사용할 순수 데이터로 변환.
